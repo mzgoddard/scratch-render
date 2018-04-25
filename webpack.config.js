@@ -1,8 +1,10 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 
 const base = {
+    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
     devServer: {
         contentBase: false,
         host: '0.0.0.0',
@@ -18,7 +20,7 @@ const base = {
                 test: /\.js$/,
                 loader: 'babel-loader',
                 options: {
-                    presets: ['es2015']
+                    presets: ['env']
                 }
             },
             {
@@ -27,10 +29,12 @@ const base = {
             }
         ]
     },
+    optimization: {
+        minimize: false
+    },
     plugins: process.env.NODE_ENV === 'production' ? [
-        new webpack.optimize.UglifyJsPlugin({
-            include: /\.min\.js$/,
-            minimize: true
+        new UglifyJsPlugin({
+            include: /\.min\.js$/
         })
     ] : []
 };
