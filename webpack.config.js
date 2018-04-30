@@ -84,6 +84,14 @@ module.exports = [
             libraryTarget: 'commonjs2',
             path: path.resolve('dist', 'node'),
             filename: '[name].js'
+        },
+        externals: {
+            'hull.js': true,
+            'linebreak': true,
+            'raw-loader': true,
+            'scratch-svg-renderer': true,
+            'twgl.js': true,
+            'xml-escape': true
         }
     })
 ];
