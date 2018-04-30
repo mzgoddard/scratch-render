@@ -1,7 +1,6 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
 
 const base = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -30,13 +29,13 @@ const base = {
         ]
     },
     optimization: {
-        minimize: false
+        minimizer: [
+            new UglifyJsPlugin({
+                include: /\.min\.js$/
+            })
+        ]
     },
-    plugins: process.env.NODE_ENV === 'production' ? [
-        new UglifyJsPlugin({
-            include: /\.min\.js$/
-        })
-    ] : []
+    plugins: []
 };
 
 module.exports = [
