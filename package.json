@@ -28,7 +28,7 @@
     "babel-eslint": "^8.2.1",
     "babel-loader": "^7.1.2",
     "babel-polyfill": "^6.22.0",
-    "base64-loader": "^1.0.0",
+    "babel-preset-env": "^1.6.1",
     "copy-webpack-plugin": "^4.5.1",
     "docdash": "^0.4.0",
     "eslint": "^4.6.1",
@@ -50,8 +50,5 @@
     "webpack-cli": "^2.0.15",
     "webpack-dev-server": "3",
     "xml-escape": "1.1.0"
-  },
-  "dependencies": {
-    "babel-preset-env": "^1.6.1"
   }
 }
