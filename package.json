@@ -49,7 +49,7 @@
     "hull.js": "0.2.10",
     "linebreak": "0.3.0",
     "raw-loader": "^0.5.1",
-    "scratch-svg-renderer": "0.1.0-prerelease.20180423193917",
+    "scratch-svg-renderer": "github:mzgoddard/scratch-svg-renderer#dependents-no-boiler",
     "twgl.js": "4.4.0",
     "xml-escape": "1.1.0"
   }
