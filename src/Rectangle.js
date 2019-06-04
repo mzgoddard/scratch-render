@@ -26,13 +26,6 @@ class Rectangle {
         this.top = top;
     }
 
-    initFromRadius (radius) {
-        this.left = -radius;
-        this.right = radius;
-        this.top = radius;
-        this.bottom = -radius;
-    }
-
     /**
      * Initialize a Rectangle to the minimum AABB around a set of points.
      * @param {Array<Array<number>>} points Array of [x, y] points.
