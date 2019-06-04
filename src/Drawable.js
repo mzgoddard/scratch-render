@@ -350,14 +350,22 @@ class Drawable {
      * @private
      */
     _calculateTransform () {
-        let updateRotation = false;
+        let updateScaleRotation = false;
         let updateAdjusted = false;
         let updateScale = false;
 
         if (this._rotationTransformDirty) {
             this._calculateRotationMatrix();
             this._rotationTransformDirty = false;
-            updateRotation = true;
+            updateScaleRotation = true;
+            updateAdjusted = true;
+        }
+
+        if (this._skinScaleDirty && this.skin !== null) {
+            this._calculateSkinScale();
+            this._skinScaleDirty = false;
+            updateScaleRotation = true;
+            updateAdjusted = true;
         }
 
         // Size rotation center relative to the skin.
@@ -365,12 +373,6 @@ class Drawable {
             this._calculateRotationSized();
             this._rotationCenterDirty = false;
             updateAdjusted = true;
-        }
-
-        if (this._skinScaleDirty && this.skin !== null) {
-            this._calculateSkinScale();
-            this._skinScaleDirty = false;
-            updateScale = true;
         }
 
         const modelMatrix = this._uniforms.u_modelMatrix;
@@ -391,7 +393,7 @@ class Drawable {
         // Commented assignments show what the values are when the matrix was
         // instantiated. Those values will never change so they do not need to
         // be reassigned.
-        if (updateRotation || updateScale) {
+        if (updateScaleRotation) {
             const scale0 = this._skinScale[0];
             const scale1 = this._skinScale[1];
             const rotation00 = this._rotationMatrix[0];
@@ -411,8 +413,6 @@ class Drawable {
             // modelMatrix[9] = 0;
             // modelMatrix[10] = 1;
             // modelMatrix[11] = 0;
-
-            updateAdjusted = true;
         }
 
         if (updateAdjusted) {
