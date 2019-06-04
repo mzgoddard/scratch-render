@@ -61,26 +61,27 @@ class Rectangle {
         }
     }
 
-    transform (m) {
-        var v0 = this.right;
-        var v1 = this.top;
-        // var v2 = v[2];
-        const m00 = m[0 + 4 + 0];
-        const m01 = m[0 + 4 + 1];
-        const m10 = m[1 + 4 + 0];
-        const m11 = m[1 + 4 + 1];
-        const m30 = m[3 + 4 + 0];
-        const m31 = m[3 + 4 + 1];
+    initFromMatrixRadius (m, r) {
+        // const v0 = r;
+        // const v1 = r;
+        // const v2 = r;
+        const m00 = m[0 * 4 + 0];
+        const m01 = m[0 * 4 + 1];
+        const m10 = m[1 * 4 + 0];
+        const m11 = m[1 * 4 + 1];
+        const m30 = m[3 * 4 + 0];
+        const m31 = m[3 * 4 + 1];
         // var d = v0 * m03 + v1 * m13 + v2 * m23 + m33;
-        // dst[0] = (v0 * m00 + v1 * m10 + v2 * m20 + m30) / d;
-        // dst[1] = (v0 * m01 + v1 * m11 + v2 * m21 + m31) / d;
+        const x0 = Math.abs(/* ( */ r * m00 /* + v1 * m10 + v2 * m20 + m30) / d */);
+        const x1 = Math.abs(/* (v0 * m00 + */ r * m10 /* + v2 * m20 + m30) / d */);
+        const y0 = Math.abs(/* ( */ r * m01 /* + v1 * m11 + v2 * m21 + m31) / d */);
+        const y1 = Math.abs(/* (v0 * m01 + */ r * m11 /* + v2 * m21 + m31) / d */);
         // dst[2] = (v0 * m02 + v1 * m12 + v2 * m22 + m32) / d;
-        // var d = v0 * m03 + v1 * m13 + v2 * m23 + m33;
-        const x = v0 * m00 + v1 * m10 /* + v2 * m20 + m30 */;
-        const y = v0 * m01 + v1 * m11 /* + v2 * m21 + m31 */;
-        // dst[2] = v0 * m02 + v1 * m12 /* + v2 * m22 */ + m32;
-        this.left = Math.min(x, -x) + m30;
-        this.right = Math.max(x, -x) + m31;
+
+        this.left = -x0 - x1 + m30;
+        this.right = x0 + x1 + m30;
+        this.top = -y0 + y1 + m31;
+        this.bottom = y0 - y1 + m31;
     }
 
     /**
