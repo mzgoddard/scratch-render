@@ -30,6 +30,9 @@ class SVGSkin extends Skin {
 
         /** @type {Number} */
         this._maxTextureScale = 0;
+
+        this._size = null;
+        this._viewOffset = null;
     }
 
     /**
@@ -47,7 +50,7 @@ class SVGSkin extends Skin {
      * @return {Array<number>} the natural size, in Scratch units, of this skin.
      */
     get size () {
-        return this._svgRenderer.size;
+        return this._size;
     }
 
     /**
@@ -56,8 +59,7 @@ class SVGSkin extends Skin {
      * @param {number} y - The y coordinate of the new rotation center.
      */
     setRotationCenter (x, y) {
-        const viewOffset = this._svgRenderer.viewOffset;
-        super.setRotationCenter(x - viewOffset[0], y - viewOffset[1]);
+        super.setRotationCenter(x - this._viewOffset[0], y - this._viewOffset[1]);
     }
 
     /**
@@ -134,6 +136,8 @@ class SVGSkin extends Skin {
             }
 
             if (typeof rotationCenter === 'undefined') rotationCenter = this.calculateRotationCenter();
+            this._size = this._svgRenderer.size;
+            this._viewOffset = this._svgRenderer.viewOffset;
             this.setRotationCenter.apply(this, rotationCenter);
             this.emit(Skin.Events.WasAltered);
         });
