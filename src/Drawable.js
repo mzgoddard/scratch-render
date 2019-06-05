@@ -510,7 +510,7 @@ class Drawable {
      * Before calling this, ensure the renderer has updated convex hull points.
      * @return {!Rectangle} Bounds for a tight box around the Drawable.
      */
-    getBounds () {
+    getBounds (bounds) {
         if (this.needsConvexHullPoints()) {
             throw new Error('Needs updated convex hull points before bounds calculation.');
         }
@@ -519,7 +519,7 @@ class Drawable {
         }
         const transformedHullPoints = this._getTransformedHullPoints();
         // Search through transformed points to generate box on axes.
-        const bounds = new Rectangle();
+        bounds = bounds || new Rectangle();
         bounds.initFromPointsAABB(transformedHullPoints);
         return bounds;
     }
@@ -556,7 +556,7 @@ class Drawable {
      * faster to calculate so may be desired for quick checks/optimizations.
      * @return {!Rectangle} Rough axis-aligned bounding box for Drawable.
      */
-    getAABB () {
+    getAABB (bounds) {
         if (this._transformDirty) {
             this._calculateTransform();
         }
@@ -578,12 +578,13 @@ class Drawable {
      * known, but otherwise return the rough AABB of the Drawable.
      * @return {!Rectangle} Bounds for the Drawable.
      */
-    getFastBounds () {
+    getFastBounds (bounds) {
+        // Why does this updateMatrix here?
         this.updateMatrix();
         if (!this.needsConvexHullPoints()) {
-            return this.getBounds();
+            return this.getBounds(bounds);
         }
-        return this.getAABB();
+        return this.getAABB(bounds);
     }
 
     /**

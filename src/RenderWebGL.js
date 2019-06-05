@@ -16,6 +16,7 @@ const log = require('./util/log');
 
 const __isTouchingDrawablesPoint = twgl.v3.create();
 const __candidatesBounds = new Rectangle();
+const __fenceBounds = new Rectangle();
 const __touchingColor = new Uint8ClampedArray(4);
 const __blendColor = new Uint8ClampedArray(4);
 
