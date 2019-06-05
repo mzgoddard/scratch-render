@@ -1328,6 +1328,70 @@ class RenderWebGL extends EventEmitter {
         }, null);
     }
 
+    updateDrawableSkinId (drawableID, skinId) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.skin = this._allSkins[skinId];
+    }
+
+    updateDrawableRotationCenter (drawableID, rotationCenter) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.skin.setRotationCenter(rotationCenter[0], rotationCenter[1]);
+    }
+
+    updateDrawableSkinIdRotationCenter (drawableID, skinId, rotationCenter) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.skin = this._allSkins[skinId];
+        drawable.skin.setRotationCenter(rotationCenter[0], rotationCenter[1]);
+    }
+
+    updateDrawablePosition (drawableID, position) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.updatePosition(position);
+    }
+
+    updateDrawableDirection (drawableID, direction) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.updateDirection(direction);
+    }
+
+    updateDrawableScale (drawableID, scale) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.updateScale(scale);
+    }
+
+    updateDrawableDirectionScale (drawableID, direction, scale) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.updateDirection(direction);
+        drawable.updateScale(scale);
+    }
+
+    updateDrawableVisible (drawableID, visible) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.updateVisible(visible);
+    }
+
+    updateDrawableEffect (drawableID, effectName, value) {
+        const drawable = this._allDrawables[drawableID];
+        // TODO: vm's requests to drawableID that do not have a Drawable object.
+        if (!drawable) return;
+        drawable.updateEffect(effectName, value);
+    }
 
     /**
      * Update the position, direction, scale, or effect properties of this Drawable.
@@ -1344,11 +1408,10 @@ class RenderWebGL extends EventEmitter {
             return;
         }
         if ('skinId' in properties) {
-            drawable.skin = this._allSkins[properties.skinId];
+            this.updateDrawableSkinId(drawableID, properties.skinId);
         }
         if ('rotationCenter' in properties) {
-            const newRotationCenter = properties.rotationCenter;
-            drawable.skin.setRotationCenter(newRotationCenter[0], newRotationCenter[1]);
+            this.updateDrawableRotationCenter(drawableID, properties.rotationCenter);
         }
         drawable.updateProperties(properties);
     }
