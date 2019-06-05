@@ -101,9 +101,9 @@ class Skin extends EventEmitter {
      * @abstract
      * @return {Array<number>} the "native" size, in texels, of this skin.
      */
-    get size () {
-        return [0, 0];
-    }
+    // get size () {
+    //     return [0, 0];
+    // }
 
     /**
      * Set the origin, in object space, about which this Skin should rotate.

@@ -31,8 +31,11 @@ class SVGSkin extends Skin {
         /** @type {Number} */
         this._maxTextureScale = 0;
 
-        this._size = null;
+        /** @type {Array<number>} the natural size, in Scratch units, of this skin. */
+        this.size = [0, 0];
+
         this._viewOffset = null;
+        this._rawRotationCenter = [NaN, NaN];
     }
 
     /**
@@ -46,12 +49,12 @@ class SVGSkin extends Skin {
         super.dispose();
     }
 
-    /**
-     * @return {Array<number>} the natural size, in Scratch units, of this skin.
-     */
-    get size () {
-        return this._size;
-    }
+    // /**
+    //  * @return {Array<number>} the natural size, in Scratch units, of this skin.
+    //  */
+    // get size () {
+    //     return this._size;
+    // }
 
     /**
      * Set the origin, in object space, about which this Skin should rotate.
@@ -59,7 +62,11 @@ class SVGSkin extends Skin {
      * @param {number} y - The y coordinate of the new rotation center.
      */
     setRotationCenter (x, y) {
-        super.setRotationCenter(x - this._viewOffset[0], y - this._viewOffset[1]);
+        if (x !== this._rawRotationCenter[0] || y !== this._rawRotationCenter[1]) {
+            this._rawRotationCenter[0] = x;
+            this._rawRotationCenter[1] = y;
+            super.setRotationCenter(x - this._viewOffset[0], y - this._viewOffset[1]);
+        }
     }
 
     /**
@@ -136,7 +143,7 @@ class SVGSkin extends Skin {
             }
 
             if (typeof rotationCenter === 'undefined') rotationCenter = this.calculateRotationCenter();
-            this._size = this._svgRenderer.size;
+            this.size = this._svgRenderer.size;
             this._viewOffset = this._svgRenderer.viewOffset;
             this.setRotationCenter.apply(this, rotationCenter);
             this.emit(Skin.Events.WasAltered);
