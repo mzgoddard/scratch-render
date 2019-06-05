@@ -43,6 +43,34 @@ const getLocalPosition = (drawable, vec) => {
     return localPosition;
 };
 
+const transformPoint2d = function (m, v, dst) {
+    dst = dst || v3.create();
+    var v0 = v[0];
+    var v1 = v[1];
+    // var v2 = v[2];
+    const m00 = m[0 * 4 + 0];
+    const m01 = m[0 * 4 + 1];
+    // const m02 = m[0 * 4 + 2];
+    // const m03 = m[0 * 4 + 3];
+    const m10 = m[1 * 4 + 0];
+    const m11 = m[1 * 4 + 1];
+    // const m12 = m[1 * 4 + 2];
+    // const m13 = m[1 * 4 + 3];
+    // const m20 = m[2 * 4 + 0];
+    // const m21 = m[2 * 4 + 1];
+    // const m22 = m[2 * 4 + 2];
+    // const m23 = m[2 * 4 + 3];
+    const m30 = m[3 * 4 + 0];
+    const m31 = m[3 * 4 + 1];
+    // const m32 = m[3 * 4 + 2];
+    // const m33 = m[3 * 4 + 3];
+    // var d = v0 * m03 + v1 * m13 + v2 * m23 + m33;
+    dst[0] = /* ( */ v0 * m00 + v1 * m10 /* + v2 * m20 */ + m30 /* ) / d */;
+    dst[1] = /* ( */ v0 * m01 + v1 * m11 /* + v2 * m21 */ + m31 /* ) / d */;
+    // dst[2] = (v0 * m02 + v1 * m12 /* + v2 * m22 */ + m32) / d;
+    return dst;
+};
+
 class Drawable {
     /**
      * An object which can be drawn by the renderer.
@@ -544,7 +572,7 @@ class Drawable {
                 (point[1] / skinSize[1]) - 0.5 + halfYPixel,
                 0
             );
-            twgl.m4.transformPoint(tm, glPoint, glPoint);
+            transformPoint2d(tm, glPoint, glPoint);
             transformedHullPoints.push(glPoint);
         }
         return transformedHullPoints;
