@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 const hull = require('hull.js');
 const twgl = require('twgl.js');
 
+const Skin = require('./Skin');
 const BitmapSkin = require('./BitmapSkin');
 const Drawable = require('./Drawable');
 const Rectangle = require('./Rectangle');
@@ -290,6 +291,15 @@ class RenderWebGL extends EventEmitter {
         this.emit(RenderConstants.Events.NativeSizeChanged, {newSize: this._nativeSize});
     }
 
+    _skinWasAltered (skin) {
+        for (let i = 0; i < this._allDrawables.length; i++) {
+            const drawable = this._allDrawables[i];
+            if (drawable && drawable._skin === skin) {
+                drawable._skinWasAltered();
+            }
+        }
+    }
+
     /**
      * Create a new bitmap skin from a snapshot of the provided bitmap data.
      * @param {ImageData|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} bitmapData - new contents for this skin.
@@ -302,6 +312,7 @@ class RenderWebGL extends EventEmitter {
         const skinId = this._nextSkinId++;
         const newSkin = new BitmapSkin(skinId, this);
         newSkin.setBitmap(bitmapData, costumeResolution, rotationCenter);
+        newSkin.addListener(Skin.Events.WasAltered, this._skinWasAltered.bind(this, newSkin));
         this._allSkins[skinId] = newSkin;
         return skinId;
     }
@@ -317,6 +328,7 @@ class RenderWebGL extends EventEmitter {
         const skinId = this._nextSkinId++;
         const newSkin = new SVGSkin(skinId, this);
         newSkin.setSVG(svgData, rotationCenter);
+        newSkin.addListener(Skin.Events.WasAltered, this._skinWasAltered.bind(this, newSkin));
         this._allSkins[skinId] = newSkin;
         return skinId;
     }
@@ -328,6 +340,7 @@ class RenderWebGL extends EventEmitter {
     createPenSkin () {
         const skinId = this._nextSkinId++;
         const newSkin = new PenSkin(skinId, this);
+        newSkin.addListener(Skin.Events.WasAltered, this._skinWasAltered.bind(this, newSkin));
         this._allSkins[skinId] = newSkin;
         return skinId;
     }
@@ -344,6 +357,7 @@ class RenderWebGL extends EventEmitter {
         const skinId = this._nextSkinId++;
         const newSkin = new TextBubbleSkin(skinId, this);
         newSkin.setTextBubble(type, text, pointsLeft);
+        newSkin.addListener(Skin.Events.WasAltered, this._skinWasAltered.bind(this, newSkin));
         this._allSkins[skinId] = newSkin;
         return skinId;
     }
