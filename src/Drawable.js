@@ -117,6 +117,7 @@ class Drawable {
         this._transformDirty = true;
         this._rotationMatrix = twgl.m4.identity();
         this._rotationTransformDirty = true;
+        this._rotationSized = twgl.v3.create();
         this._rotationAdjusted = twgl.v3.create();
         this._rotationCenterDirty = true;
         this._skinScale = twgl.v3.create(0, 0, 0);
@@ -265,99 +266,114 @@ class Drawable {
         }
     }
 
+    _calculateRotationMatrix () {
+        const rotation = (270 - this._direction) * Math.PI / 180;
+
+        // Calling rotationZ sets the destination matrix to a rotation
+        // around the Z axis setting matrix components 0, 1, 4 and 5 with
+        // cosine and sine values of the rotation.
+        // twgl.m4.rotationZ(rotation, this._rotationMatrix);
+
+        // twgl assumes the last value set to the matrix was anything.
+        // Drawable knows, it was another rotationZ matrix, so we can skip
+        // assigning the values that will never change.
+        const c = Math.cos(rotation);
+        const s = Math.sin(rotation);
+        this._rotationMatrix[0] = c;
+        this._rotationMatrix[1] = s;
+        // this._rotationMatrix[2] = 0;
+        // this._rotationMatrix[3] = 0;
+        this._rotationMatrix[4] = -s;
+        this._rotationMatrix[5] = c;
+        // this._rotationMatrix[6] = 0;
+        // this._rotationMatrix[7] = 0;
+        // this._rotationMatrix[8] = 0;
+        // this._rotationMatrix[9] = 0;
+        // this._rotationMatrix[10] = 1;
+        // this._rotationMatrix[11] = 0;
+        // this._rotationMatrix[12] = 0;
+        // this._rotationMatrix[13] = 0;
+        // this._rotationMatrix[14] = 0;
+        // this._rotationMatrix[15] = 1;
+    }
+
+    _calculateRotationSized () {
+        // twgl version of the following in function work.
+        // let rotationSized = twgl.v3.subtractScalar(
+        //     twgl.v3.div(
+        //         this.skin.rotationCenter,
+        //         this.skin.size,
+        //         this._rotationSized
+        //     ),
+        //     0.5,
+        //     this._rotationSized
+        // );
+        // rotationSized[1] *= -1; // Y flipped to Scratch coordinate.
+        // rotationSized[2] = 0; // Z coordinate is 0.
+
+        // Locally assign rotationCenter and skinSize to keep from having
+        // the Skin getter properties called twice while locally assigning
+        // their components for readability.
+        const rotationCenter = this.skin.rotationCenter;
+        const skinSize = this.skin.size;
+        const center0 = rotationCenter[0];
+        const center1 = rotationCenter[1];
+        const skinSize0 = skinSize[0];
+        const skinSize1 = skinSize[1];
+
+        const rotationSized = this._rotationSized;
+        rotationSized[0] = (center0 / skinSize0 - 0.5);
+        rotationSized[1] = (center1 / skinSize1 - 0.5) * -1;
+        // rotationAdjusted[2] = 0;
+    }
+
+    _calculateSkinScale () {
+        // twgl version of the following in function work.
+        // const scaledSize = twgl.v3.divScalar(
+        //     twgl.v3.multiply(this.skin.size, this._scale),
+        //     100
+        // );
+        // // was NaN because the vectors have only 2 components.
+        // scaledSize[2] = 0;
+
+        // Locally assign skinSize to keep from having the Skin getter
+        // properties called twice.
+        const skinSize = this.skin.size;
+        const scaledSize = this._skinScale;
+        const scale = this._scale;
+        scaledSize[0] = skinSize[0] * scale[0] / 100;
+        scaledSize[1] = skinSize[1] * scale[1] / 100;
+        // scaledSize[2] = 0;
+    }
+
     /**
      * Calculate the transform to use when rendering this Drawable.
      * @private
      */
     _calculateTransform () {
+        let updateScaleRotation = false;
+        let updateAdjusted = false;
+        let updateScale = false;
+
         if (this._rotationTransformDirty) {
-            const rotation = (270 - this._direction) * Math.PI / 180;
-
-            // Calling rotationZ sets the destination matrix to a rotation
-            // around the Z axis setting matrix components 0, 1, 4 and 5 with
-            // cosine and sine values of the rotation.
-            // twgl.m4.rotationZ(rotation, this._rotationMatrix);
-
-            // twgl assumes the last value set to the matrix was anything.
-            // Drawable knows, it was another rotationZ matrix, so we can skip
-            // assigning the values that will never change.
-            const c = Math.cos(rotation);
-            const s = Math.sin(rotation);
-            this._rotationMatrix[0] = c;
-            this._rotationMatrix[1] = s;
-            // this._rotationMatrix[2] = 0;
-            // this._rotationMatrix[3] = 0;
-            this._rotationMatrix[4] = -s;
-            this._rotationMatrix[5] = c;
-            // this._rotationMatrix[6] = 0;
-            // this._rotationMatrix[7] = 0;
-            // this._rotationMatrix[8] = 0;
-            // this._rotationMatrix[9] = 0;
-            // this._rotationMatrix[10] = 1;
-            // this._rotationMatrix[11] = 0;
-            // this._rotationMatrix[12] = 0;
-            // this._rotationMatrix[13] = 0;
-            // this._rotationMatrix[14] = 0;
-            // this._rotationMatrix[15] = 1;
-
+            this._calculateRotationMatrix();
             this._rotationTransformDirty = false;
-        }
-
-        // Adjust rotation center relative to the skin.
-        if (this._rotationCenterDirty && this.skin !== null) {
-            // twgl version of the following in function work.
-            // let rotationAdjusted = twgl.v3.subtract(
-            //     this.skin.rotationCenter,
-            //     twgl.v3.divScalar(this.skin.size, 2, this._rotationAdjusted),
-            //     this._rotationAdjusted
-            // );
-            // rotationAdjusted = twgl.v3.multiply(
-            //     rotationAdjusted, this._scale, rotationAdjusted
-            // );
-            // rotationAdjusted = twgl.v3.divScalar(
-            //     rotationAdjusted, 100, rotationAdjusted
-            // );
-            // rotationAdjusted[1] *= -1; // Y flipped to Scratch coordinate.
-            // rotationAdjusted[2] = 0; // Z coordinate is 0.
-
-            // Locally assign rotationCenter and skinSize to keep from having
-            // the Skin getter properties called twice while locally assigning
-            // their components for readability.
-            const rotationCenter = this.skin.rotationCenter;
-            const skinSize = this.skin.size;
-            const center0 = rotationCenter[0];
-            const center1 = rotationCenter[1];
-            const skinSize0 = skinSize[0];
-            const skinSize1 = skinSize[1];
-            const scale0 = this._scale[0];
-            const scale1 = this._scale[1];
-
-            const rotationAdjusted = this._rotationAdjusted;
-            rotationAdjusted[0] = (center0 - (skinSize0 / 2)) * scale0 / 100;
-            rotationAdjusted[1] = ((center1 - (skinSize1 / 2)) * scale1 / 100) * -1;
-            // rotationAdjusted[2] = 0;
-
-            this._rotationCenterDirty = false;
+            updateScaleRotation = true;
+            updateAdjusted = true;
         }
 
         if (this._skinScaleDirty && this.skin !== null) {
-            // twgl version of the following in function work.
-            // const scaledSize = twgl.v3.divScalar(
-            //     twgl.v3.multiply(this.skin.size, this._scale),
-            //     100
-            // );
-            // // was NaN because the vectors have only 2 components.
-            // scaledSize[2] = 0;
-
-            // Locally assign skinSize to keep from having the Skin getter
-            // properties called twice.
-            const skinSize = this.skin.size;
-            const scaledSize = this._skinScale;
-            scaledSize[0] = skinSize[0] * this._scale[0] / 100;
-            scaledSize[1] = skinSize[1] * this._scale[1] / 100;
-            // scaledSize[2] = 0;
-
+            this._calculateSkinScale();
             this._skinScaleDirty = false;
+            updateScaleRotation = true;
+            updateAdjusted = true;
+        }
+
+        // Size rotation center relative to the skin.
+        if (this._rotationCenterDirty && this.skin !== null) {
+            this._calculateRotationSized();
+            this._rotationCenterDirty = false;
+            updateAdjusted = true;
         }
 
         const modelMatrix = this._uniforms.u_modelMatrix;
@@ -375,34 +391,48 @@ class Drawable {
         // _calculateTransform and greatly reduce the ammount of math and array
         // assignments needed.
 
-        const scale0 = this._skinScale[0];
-        const scale1 = this._skinScale[1];
-        const rotation00 = this._rotationMatrix[0];
-        const rotation01 = this._rotationMatrix[1];
-        const rotation10 = this._rotationMatrix[4];
-        const rotation11 = this._rotationMatrix[5];
+        // Commented assignments show what the values are when the matrix was
+        // instantiated. Those values will never change so they do not need to
+        // be reassigned.
+        if (updateScaleRotation) {
+            const scale0 = this._skinScale[0];
+            const scale1 = this._skinScale[1];
+            const rotation00 = this._rotationMatrix[0];
+            const rotation01 = this._rotationMatrix[1];
+            const rotation10 = this._rotationMatrix[4];
+            const rotation11 = this._rotationMatrix[5];
+
+            modelMatrix[0] = scale0 * rotation00;
+            modelMatrix[1] = scale0 * rotation01;
+            // modelMatrix[2] = 0;
+            // modelMatrix[3] = 0;
+            modelMatrix[4] = scale1 * rotation10;
+            modelMatrix[5] = scale1 * rotation11;
+            // modelMatrix[6] = 0;
+            // modelMatrix[7] = 0;
+            // modelMatrix[8] = 0;
+            // modelMatrix[9] = 0;
+            // modelMatrix[10] = 1;
+            // modelMatrix[11] = 0;
+        }
+
+        if (updateAdjusted) {
+            const rotationSized0 = this._rotationSized[0];
+            const rotationSized1 = this._rotationSized[1];
+            const rotationAdjusted = this._rotationAdjusted;
+
+            rotationAdjusted[0] = (modelMatrix[0] * rotationSized0) + (modelMatrix[4] * rotationSized1);
+            rotationAdjusted[1] = (modelMatrix[1] * rotationSized0) + (modelMatrix[5] * rotationSized1);
+            // rotationAdjusted[2] = 0;
+        }
+
         const adjusted0 = this._rotationAdjusted[0];
         const adjusted1 = this._rotationAdjusted[1];
         const position0 = this._position[0];
         const position1 = this._position[1];
 
-        // Commented assignments show what the values are when the matrix was
-        // instantiated. Those values will never change so they do not need to
-        // be reassigned.
-        modelMatrix[0] = scale0 * rotation00;
-        modelMatrix[1] = scale0 * rotation01;
-        // modelMatrix[2] = 0;
-        // modelMatrix[3] = 0;
-        modelMatrix[4] = scale1 * rotation10;
-        modelMatrix[5] = scale1 * rotation11;
-        // modelMatrix[6] = 0;
-        // modelMatrix[7] = 0;
-        // modelMatrix[8] = 0;
-        // modelMatrix[9] = 0;
-        // modelMatrix[10] = 1;
-        // modelMatrix[11] = 0;
-        modelMatrix[12] = (rotation00 * adjusted0) + (rotation10 * adjusted1) + position0;
-        modelMatrix[13] = (rotation01 * adjusted0) + (rotation11 * adjusted1) + position1;
+        modelMatrix[12] = adjusted0 + position0;
+        modelMatrix[13] = adjusted1 + position1;
         // modelMatrix[14] = 0;
         // modelMatrix[15] = 1;
 
