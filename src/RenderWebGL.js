@@ -1344,35 +1344,29 @@ class RenderWebGL extends EventEmitter {
      * @param {Array.<number, number>} position to be fenced - An array of type [x, y]
      * @return {Array.<number, number>} The fenced position as an array [x, y]
      */
-    getFencedPositionOfDrawable (drawableID, position) {
-        let x = position[0];
-        let y = position[1];
+    getFencedPositionOfDrawable (drawableID, position, dst) {
+        dst = dst || [0, 0];
 
         const drawable = this._allDrawables[drawableID];
         if (!drawable) {
             // TODO: fix whatever's wrong in the VM which causes this, then add a warning or throw here.
             // Right now this happens so much on some projects that a warning or exception here can hang the browser.
-            return [x, y];
+            dst[0] = position[0];
+            dst[1] = position[1];
+            return dst;
         }
 
-        const dx = x - drawable._position[0];
-        const dy = y - drawable._position[1];
         const aabb = drawable._skin.getFenceBounds(drawable);
         const inset = Math.floor(Math.min(aabb.width, aabb.height) / 2);
+        const fenceWidth = Math.min(FENCE_WIDTH, inset);
+        const sx = this._xRight - fenceWidth;
+        const sy = this._yTop - fenceWidth;
+        const x0 = drawable._position[0];
+        const y0 = drawable._position[1];
 
-        const sx = this._xRight - Math.min(FENCE_WIDTH, inset);
-        if (aabb.right + dx < -sx) {
-            x = Math.ceil(drawable._position[0] - (sx + aabb.right));
-        } else if (aabb.left + dx > sx) {
-            x = Math.floor(drawable._position[0] + (sx - aabb.left));
-        }
-        const sy = this._yTop - Math.min(FENCE_WIDTH, inset);
-        if (aabb.top + dy < -sy) {
-            y = Math.ceil(drawable._position[1] - (sy + aabb.top));
-        } else if (aabb.bottom + dy > sy) {
-            y = Math.floor(drawable._position[1] + (sy - aabb.bottom));
-        }
-        return [x, y];
+        dst[0] = Math.min(Math.max(position[0], Math.ceil(-sx - aabb.right + x0)), Math.floor(sx - aabb.left + x0));
+        dst[1] = Math.min(Math.max(position[1], Math.ceil(-sy - aabb.top + y0)), Math.floor(sy - aabb.bottom + y0));
+        return dst;
     }
 
     /**
@@ -1627,14 +1621,14 @@ class RenderWebGL extends EventEmitter {
             }
 
             twgl.setUniforms(currentShader, uniforms);
-            
+
             /* adjust blend function for this skin */
             if (drawable.skin.hasPremultipliedAlpha){
                 gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
             } else {
                 gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
             }
-            
+
             twgl.drawBufferInfo(gl, this._bufferInfo, gl.TRIANGLES);
         }
 
