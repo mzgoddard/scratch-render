@@ -131,7 +131,7 @@ class Drawable {
         this._convexHullPoints = null;
         this._convexHullDirty = true;
 
-        this._skinWasAltered = this._skinWasAltered.bind(this);
+        // this._skinWasAltered = this._skinWasAltered.bind(this);
     }
 
     /**
@@ -170,13 +170,13 @@ class Drawable {
      */
     set skin (newSkin) {
         if (this._skin !== newSkin) {
-            if (this._skin) {
-                this._skin.removeListener(Skin.Events.WasAltered, this._skinWasAltered);
-            }
+            // if (this._skin) {
+            //     this._skin.removeListener(Skin.Events.WasAltered, this._skinWasAltered);
+            // }
             this._skin = newSkin;
-            if (this._skin) {
-                this._skin.addListener(Skin.Events.WasAltered, this._skinWasAltered);
-            }
+            // if (this._skin) {
+            //     this._skin.addListener(Skin.Events.WasAltered, this._skinWasAltered);
+            // }
             this._skinWasAltered();
         }
     }
