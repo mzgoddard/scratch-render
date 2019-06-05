@@ -594,8 +594,6 @@ class Drawable {
      * @return {!Rectangle} Bounds for the Drawable.
      */
     getFastBounds (bounds) {
-        // Why does this updateMatrix here?
-        this.updateMatrix();
         if (!this.needsConvexHullPoints()) {
             return this.getBounds(bounds);
         }
