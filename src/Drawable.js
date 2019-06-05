@@ -561,14 +561,8 @@ class Drawable {
             this._calculateTransform();
         }
         const tm = this._uniforms.u_modelMatrix;
-        const bounds = new Rectangle();
+        bounds = bounds || new Rectangle();
         bounds.initFromMatrixRadius(tm, 0.5);
-        // bounds.initFromPointsAABB([
-        //     transformPoint2d(tm, [-0.5, -0.5, 0]),
-        //     transformPoint2d(tm, [0.5, -0.5, 0]),
-        //     transformPoint2d(tm, [-0.5, 0.5, 0]),
-        //     transformPoint2d(tm, [0.5, 0.5, 0])
-        // ]);
         return bounds;
     }
 

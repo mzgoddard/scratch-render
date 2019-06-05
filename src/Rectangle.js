@@ -65,10 +65,12 @@ class Rectangle {
         const m30 = m[3 * 4 + 0];
         const m31 = m[3 * 4 + 1];
         // var d = v0 * m03 + v1 * m13 + v2 * m23 + m33;
-        const x0 = Math.abs(/* ( */ r * m00 /* + v1 * m10 + v2 * m20 + m30) / d */);
-        const x1 = Math.abs(/* (v0 * m00 + */ r * m10 /* + v2 * m20 + m30) / d */);
-        const y0 = Math.abs(/* ( */ r * m01 /* + v1 * m11 + v2 * m21 + m31) / d */);
-        const y1 = Math.abs(/* (v0 * m01 + */ r * m11 /* + v2 * m21 + m31) / d */);
+        // dst[0] = (
+        const x0 = Math.abs(r * m00); // +
+        const x1 = Math.abs(r * m10); // + v2 * m20 + m30) / d;
+        // dst[1] = (
+        const y0 = Math.abs(r * m01); // +
+        const y1 = Math.abs(r * m11); // + v2 * m21 + m31) / d;
         // dst[2] = (v0 * m02 + v1 * m12 + v2 * m22 + m32) / d;
 
         this.left = -x0 - x1 + m30;
