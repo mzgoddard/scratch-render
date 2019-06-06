@@ -75,8 +75,8 @@ class Rectangle {
 
         this.left = -x0 - x1 + m30;
         this.right = x0 + x1 + m30;
-        this.top = -y0 + y1 + m31;
-        this.bottom = y0 - y1 + m31;
+        this.top = y0 + y1 + m31;
+        this.bottom = -y0 - y1 + m31;
     }
 
     /**
