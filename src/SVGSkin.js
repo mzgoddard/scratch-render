@@ -34,7 +34,7 @@ class SVGSkin extends Skin {
         /** @type {Array<number>} the natural size, in Scratch units, of this skin. */
         this.size = [0, 0];
 
-        this._viewOffset = null;
+        this._viewOffset = [0, 0];
         this._rawRotationCenter = [NaN, NaN];
     }
 
