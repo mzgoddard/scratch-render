@@ -33,6 +33,9 @@ class Skin extends EventEmitter {
         /** @type {Vec3} */
         this._rotationCenter = twgl.v3.create(0, 0);
 
+        /** @type {Vec3} */
+        this._rotationCenterUnit = twgl.v3.create(0, 0);
+
         /**
          * The uniforms to be used by the vertex and pixel shaders.
          * Some of these are used by other parts of the renderer as well.
@@ -97,6 +100,10 @@ class Skin extends EventEmitter {
         return this._rotationCenter;
     }
 
+    get rotationCenterUnit () {
+        return this._rotationCenterUnit;
+    }
+
     /**
      * @abstract
      * @return {Array<number>} the "native" size, in texels, of this skin.
@@ -121,6 +128,8 @@ class Skin extends EventEmitter {
         if (!emptySkin && changed) {
             this._rotationCenter[0] = x;
             this._rotationCenter[1] = y;
+            this._rotationCenterUnit[0] = (x / this.size[0]) - 0.5;
+            this._rotationCenterUnit[1] = 0.5 - (y / this.size[1]);
             this.emit(Skin.Events.WasAltered);
         }
     }
