@@ -1,9 +1,12 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const IgnorePlugin = require('webpack').IgnorePlugin;
+
+const NODE_ENV = process.env.NODE_ENV;
 
 const base = {
-    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
+    mode: NODE_ENV === 'production' ? 'production' : 'development',
     devServer: {
         contentBase: false,
         host: '0.0.0.0',
@@ -36,7 +39,7 @@ const base = {
 
 module.exports = [
     // Playground
-    Object.assign({}, base, {
+    NODE_ENV !== 'test' ? Object.assign({}, base, {
         target: 'web',
         entry: {
             playground: './src/playground/playground.js',
@@ -55,9 +58,9 @@ module.exports = [
                 }
             ])
         ])
-    }),
+    }) : null,
     // Web-compatible
-    Object.assign({}, base, {
+    NODE_ENV !== 'test' ? Object.assign({}, base, {
         target: 'web',
         entry: {
             'scratch-render': './src/index.js',
@@ -69,9 +72,24 @@ module.exports = [
             path: path.resolve('dist', 'web'),
             filename: '[name].js'
         }
-    }),
+    }) : null,
+    // Web-test-compatible
+    NODE_ENV === 'test' ? Object.assign({}, base, {
+        target: 'web',
+        entry: {
+            'scratch-render': './test/fixtures/src-files.js',
+            'tape': 'tape'
+        },
+        output: {
+            library: '[name]',
+            libraryTarget: 'umd',
+            path: path.resolve('dist', 'test'),
+            filename: '[name].js'
+        },
+        plugins: base.plugins.concat(new IgnorePlugin(/fs/))
+    }) : null,
     // Node-compatible
-    Object.assign({}, base, {
+    NODE_ENV !== 'test' ? Object.assign({}, base, {
         target: 'node',
         entry: {
             'scratch-render': './src/index.js'
@@ -90,5 +108,5 @@ module.exports = [
             'twgl.js': true,
             'xml-escape': true
         }
-    })
-];
+    }) : null
+].filter(Boolean);
