@@ -1,6 +1,4 @@
-const test = require('tap');
-
-const {add, resolver, and, call, run, build, loadModule} = require('../fixtures/declare-tests');
+const {add, resolver, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
 const declareSkin = require('../fixtures/declare-Skin');
@@ -10,19 +8,20 @@ const newSkin = and([
     call('skinId'),
     add({
         concreteSkin: false,
-        test: function (context) {
+        test: [function newSkinTest (context) {
             context.value = context.skin = new context.module.Skin(context.skinId);
-        }
+        }]
     })
 ]);
 
-run(and([call('skinUpdate'), buildChromeless])({
+run(and([
+    call('skinUpdate'),
+    buildChromeless,
+    buildPlan(1)
+])({
+    reports: [],
     resolver: resolver({
         ...declareSkin,
         newSkin,
     }),
-    tests: []
-}, function (state, after) {
-    // console.log(state.builtTest.toString());
-    return after;
-}));
+}, afterEach, buildPlan.end));

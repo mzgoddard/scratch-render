@@ -11,20 +11,46 @@ const eventsMembers = and([
 const newSkin = call('newSkin');
 const setImage = fail;
 const skinId = add({
-    test: function(context) {
+    test: [function skinIdTest (context) {
         context.skinId = Math.random().toString().slice(2);
-    }
+    }]
 });
 const skinInitialMembers = and([
     get('id'),
-    get('rotationCenter')
+    get('rotationCenter'),
+    add({
+        plan: 1,
+        test: [function rotationCenterIsArray (context) {
+            return [['ok', context.value.rotationCenter.length >= 2]];
+        }]
+    })
 ]);
 // const willEmitWasAltered = willEmitEvent('WasAltered');
 const willEmitWasAltered = pass;
 
 const postChangeSkin = and([
     get('size'),
-    get('rotationCenter')
+    state('imageSize'),
+    add({
+        plan: 1,
+        test: [function skinSize (context) {
+            const {size} = context.skin;
+            return [['same',
+                [Math.ceil(size[0]), Math.ceil(size[1])],
+                context.imageSize]];
+        }]
+    }),
+    get('rotationCenter'),
+    state('imageRotationCenter'),
+    add({
+        plan: 1,
+        test: [function skinRotationCenter (context) {
+            const {rotationCenter} = context.skin;
+            return [['same',
+                [Math.ceil(rotationCenter[0]), Math.ceil(rotationCenter[1])],
+                context.imageRotationCenter]];
+        }]
+    })
 ]);
 
 const postAlterSkin = and([
@@ -33,20 +59,20 @@ const postAlterSkin = and([
 ]);
 
 const changeSkin = and([
-    concrete,
-    willEmitWasAltered,
-    createImage,
-    setImage,
-    postChangeSkin,
-    didEmitWasAltered,
-    postAlterSkin
+    call('concrete'),
+    call('willEmitWasAltered'),
+    call('createImage'),
+    call('setImage'),
+    call('postChangeSkin'),
+    call('didEmitWasAltered'),
+    call('postAlterSkin')
 ])
 
 const skin = or([
     and([
         newSkin,
-        eventsMembers,
-        skinInitialMembers
+        call('eventsMembers'),
+        call('skinInitialMembers')
     ]),
     and([
         newSkin,

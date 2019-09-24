@@ -1,9 +1,10 @@
 const merge = function (s, t) {
     return {
         ...s,
+        ...t,
         plan: (s.plan || 0) + (t.plan || 0),
         module: {...s.module, ...t.module},
-        tests: [...s.tests, ...t.tests]
+        tests: [...(s.tests || []), ...(t.tests || [])]
     };
 };
 
@@ -17,12 +18,6 @@ const _or = function (a, b) {
     };
 };
 
-const or = function (list) {
-    return list.reduceRight((carry, item) => {
-        return _or(item, carry);
-    });
-};
-
 const _and = function (a, b) {
     if (typeof a !== 'function') throw new Error('Passed a non-function.');
     if (typeof b !== 'function') throw new Error('Passed a non-function.');
@@ -33,10 +28,23 @@ const _and = function (a, b) {
     };
 };
 
-const and = function (list) {
-    return list.reduceRight((carry, item) => {
-        return _and(item, carry);
-    });
+const _reduceRight = function (fn) {
+    return function (list) {
+        return list.reduceRight((carry, item) => fn(item, carry));
+    };
+};
+
+const or = _reduceRight(_or);
+const and = _reduceRight(_and);
+
+const not = function (f) {
+    return function (state, each, after) {
+        return f(state, function _notEach (state) {
+            return fail(state, each, after);
+        }, function _notAfter () {
+            return each(state, after);
+        });
+    };
 };
 
 const add = function ({test, tests, ..._state}) {
@@ -46,27 +54,38 @@ const add = function ({test, tests, ..._state}) {
     };
 };
 
-const state = function (key, valueTest = value => value === true) {
+const state = function (path, valueTest = value => value === true) {
     return function _stateScope (state, each, after) {
-        if (valueTest(state[key])) {
-            return each(state, after);
+        let value = state;
+        if (typeof path === 'string') value = value[path];
+        else {
+            for (let i = 0; value && i < path.length; i++) {
+                value = value[path[i]];
+            }
+        }
+
+        if (valueTest(value)) return each(state, after);
+        if (state.reports) {
+            state.reports.push({
+                reason: 'state',
+                args: [path, valueTest],
+                value,
+                tests: state.tests || []
+            });
         }
         return after;
     };
 };
 
-const get = function (key, valueTest) {
-    return function _getScope (state, each, after) {
-        const test = (new Function (`
-            return function (context) {
-                return [
-                    ['ok', ${JSON.stringify(key)} in context.value],
-                    ${valueTest ? `(${valueTest.toString()})(context)` : ''}
-                ];
-            };
-        `)());
-        return each(merge(state, {plan: valueTest ? 2 : 1, tests: [test]}), after);
-    };
+function getTest (context, key) {
+    return [['ok', key in context.value]];
+};
+
+const get = function (key) {
+    return add({
+        plan: 1,
+        test: [getTest, key]
+    });
 };
 
 const resolver = function (map) {
@@ -82,39 +101,49 @@ const call = function (name, _default = callDefault) {
     };
 };
 
+function loadModuleVarTest (context, name, srcPath) {
+    context.module = context.module || {};
+    context.module[name] = window['scratch-render'](srcPath);
+    return [['ok', context.module[name]]];
+};
+
 const loadModuleVar = function (name, srcPath) {
-    return function _loadModuleVarScope (state, each, after) {
-        if (state.module && state.module[name]) return each(state, after);
-        const test = new Function(`return function (context) {
-            context.module = context.module || {};
-            context.module.${name} = window['scratch-render'](${JSON.stringify(srcPath)});
-            return [['ok', context.module.${name}]];
-        }`)();
-        return each(merge(state, {
-            plan: 1,
-            module: {[name]: true},
-            tests: [test]
-        }), after);
-    };
+    return or([
+        state(['module', name]),
+        and([
+            not(state(['module', name])),
+            add({
+                plan: 1,
+                module: {[name]: true},
+                tests: [[loadModuleVarTest, name, srcPath]]
+            })
+        ])
+    ]);
 };
 
 const loadModule = loadModuleVar;
 
+const afterEach = function (state, after) {
+    return after;
+};
+
 const run = function (f) {
-    let last = f;
     while (f) {
-        // console.log(f.toString());
-        last = f;
         const _f = f();
         if (_f && typeof _f !== 'function') {
             throw new Error('Returned non-function.\n' + String(_f));
         }
         f = _f;
     }
-    // console.log(last.toString());
 };
 
 const fail = function (state, each, after) {
+    if (state.reports) {
+        state.reports.push({
+            reason: 'fail',
+            tests: state.tests || []
+        });
+    }
     return after;
 };
 
@@ -132,6 +161,40 @@ const build = function (state, each, after) {
     return each({...state, builtTest}, after);
 };
 
+let plan;
+let count;
+let reports;
+const buildPlan = function (_plan) {
+    plan = _plan;
+    count = 0;
+    return function (state, each, after) {
+        reports = state.reports;
+        if (state.reports) {
+            state.reports.push({
+                reason: 'true',
+                tests: state.tests
+            });
+        }
+
+        count++;
+        return each(state, after);
+    };
+};
+
+buildPlan.end = function () {
+    if (plan !== count) {
+        if (reports) {
+            console.error(JSON.stringify(reports, function (key, value) {
+                if (typeof value === 'function') {
+                    return value.toString();
+                }
+                return value;
+            }, '    '));
+        }
+        throw new Error(`Planned to build ${plan} tests, but built ${count}.`);
+    }
+};
+
 module.exports = {
     or,
     and,
@@ -140,10 +203,12 @@ module.exports = {
     get,
     resolver,
     call,
+    afterEach,
     loadModuleVar,
     loadModule,
     run,
     fail,
     pass,
-    build
+    build,
+    buildPlan
 };
