@@ -112,6 +112,9 @@ const loadModuleVar = function (name, srcPath) {
         state(['module', name]),
         and([
             not(state(['module', name])),
+            // add({
+            //     tests: [[async function () {await new Promise(r => setTimeout(r, 10000))}]]
+            // }),
             add({
                 plan: 1,
                 module: {[name]: true},

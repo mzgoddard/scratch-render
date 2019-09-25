@@ -43,7 +43,12 @@ async function evaluate (t, chromeless, fn, ...args) {
 const fnMap = new WeakMap();
 
 const fs = require('fs');
-fs.removeSync(process.mainModule.filename + '.test');
+try {
+    fs.unlinkSync(process.mainModule.filename + '.test');
+} catch (e) {}
+fs.appendFileSync(process.mainModule.filename + '.test', [
+    `const chromelessTest = require('../fixtures/chromeless-tape');`
+].join('\n') + '\n\n');
 
 const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, after) {
     const tests = _tests.map(([fn, ...args]) => {
@@ -66,10 +71,16 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
         return [testFn, ...args];
     });
     const fullTest = new Function(`
-        return async function (args) {
-            return [
-                ${tests.map(([fn, ...args], index) => `['comment', '${fn.name}(...${JSON.stringify(args)})'], ...(await (${fn.toString()})(...args[${index}]) || [])`)}
-            ];
+        return async function (coverage) {
+            try {
+                window.__coverage__ = coverage;
+                const context = {};
+                return [
+                    ${tests.map(([fn, ...args], index) => `['comment', '${fn.name}(...${JSON.stringify(args)})'],\n...(await (${_tests[index][0].toString()})(context, ...${JSON.stringify(args)}) || [])`).join(',\n')}
+                ].concat([['coverage', window.__coverage__]]);
+            } catch (e) {
+                return [['fail', e.stack || e.message]];
+            }
         };
     `)();
     const fullArgs = tests.map(([fn, ...args]) => args);
@@ -85,7 +96,18 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
     };
     Promise.resolve().then(() => {
         const file = /\/([^/]+)$/.exec(process.mainModule.filename)[1].split('.')[0];
-        const body = `chromelessTest('${file} tests: ${tests.length} asserts: ${plan}', builtTest);`;
+        const body = indent(`chromelessTest('${file} tests: ${tests.length} asserts: ${plan}', async function (t, chromeless) {
+            t.plan(${plan});
+            try {
+                const results = await chromeless.evaluate(${fullTest.toString()}, global.__coverage__);
+                (results || []).map(([fn, ...args]) => {
+                    if (fn === 'coverage') global.__coverage__ = args[0];
+                    else if (t[fn]) t[fn](...args);
+                });
+            } catch (e) {
+                t.fail(e.stack || e.message || e);
+            }
+        });`);
         fs.appendFileSync(process.mainModule.filename + '.test', body);
         eval(body);
     });

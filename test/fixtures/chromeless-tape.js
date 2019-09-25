@@ -6,6 +6,10 @@ const {createHash} = require('crypto');
 const readFile = util.promisify(fs.readFile);
 
 const {test, teardown} = require('tap');
+// const nyc = require('nyc');
+const {createInstrumenter} = require('nyc/node_modules/istanbul-lib-instrument');
+const convertSourceMap = require('convert-source-map');
+const mergeSourceMap = require('merge-source-map');
 
 const {Chromeless} = require('chromeless');
 
@@ -22,14 +26,68 @@ let chromeless;
 const miniServer = function (port = 8000) {
     const fileCache = {};
 
+    let _instrumenter = null;
+
+    async function instrument (buffer, fullPath) {
+        if (fullPath.endsWith('scratch-render.js')) {
+            const source = buffer.toString();
+            const sourceMap = JSON.parse(fs.readFileSync(fullPath + '.map').toString());
+            return source;
+            try {
+                if (!_instrumenter) {
+                    _instrumenter = createInstrumenter({
+                        autoWrap: true,
+                        coverageVariable: '__coverage__',
+                        embedSource: true,
+                        // compact: false,
+                        // preserveComments: false,
+                        produceSourceMap: true,
+                        // ignoreClassMethods: false,
+                        // esModules: false
+
+                        // ...configPlugins
+                        // preserveComments: options.preserveComments,
+                        // produceSourceMap: options.produceSourceMap,
+                        // ignoreClassMethods: options.ignoreClassMethods,
+                        // esModules: options.esModules,
+                        // ...configPlugins
+                    });
+                }
+                // console.log(_instrumenter.constructor.name);
+                let instrumented = _instrumenter.instrumentSync(source, path.relative(pathRoot(), fullPath));
+                if (sourceMap) {
+                    let lastSourceMap = _instrumenter.lastSourceMap();
+                    if (lastSourceMap) {
+                        if (sourceMap) {
+                            lastSourceMap = mergeSourceMap(
+                                sourceMap,
+                                lastSourceMap
+                            )
+                        }
+                        instrumented += '\n' + convertSourceMap.fromObject(lastSourceMap).toComment();
+                    }
+                }
+                fs.writeFileSync(
+                    path.dirname(fullPath) + '/scratch-render.coverage.js',
+                    instrumented
+                );
+                return instrumented;
+            } catch (e) {
+                console.error(e.stack || e.message || e.toString());
+                process.exit(1);
+            }
+        }
+        return buffer;
+    }
+
     function loadFile (fullPath) {
         if (!fileCache[fullPath]) {
             fileCache[fullPath] = readFile(fullPath)
-                .then(buffer => ({
+                .then(async buffer => ({
                     etag: createHash('md5')
                         .update(buffer)
                         .digest().base64Slice(),
-                    buffer
+                    buffer: await instrument(buffer, fullPath)
                 }));
         }
     }
@@ -38,7 +96,7 @@ const miniServer = function (port = 8000) {
         try {
             const fullPath = path.join(__dirname, '../..', req.url);
             try {
-                loadFile(fullPath);
+                await loadFile(fullPath);
                 await fileCache[fullPath];
             } catch (e) {
                 res.statusCode = 404;
