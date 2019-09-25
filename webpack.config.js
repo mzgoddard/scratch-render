@@ -86,6 +86,20 @@ module.exports = [
             path: path.resolve('dist', 'test'),
             filename: '[name].js'
         },
+        module: {
+            rules: [
+                {
+                    include: [
+                        path.resolve('src')
+                    ],
+                    test: /\.js$/,
+                    loader: 'babel-loader',
+                    options: {
+                        plugins: [['babel-plugin-istanbul']]
+                    }
+                }
+            ].concat(base.module.rules)
+        },
         plugins: base.plugins.concat(new IgnorePlugin(/fs/))
     }) : null,
     // Node-compatible

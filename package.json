@@ -46,6 +46,7 @@
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
+    "babel-plugin-istanbul": "^4.1.6",
     "grapheme-breaker": "0.3.2",
     "hull.js": "0.2.10",
     "ify-loader": "1.0.4",
