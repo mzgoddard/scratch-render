@@ -2,11 +2,14 @@ const path = require('path');
 const http = require('http');
 const fs = require('fs');
 const util = require('util');
+const {createHash} = require('crypto');
 const readFile = util.promisify(fs.readFile);
 
 const {test, teardown} = require('tap');
 
 const {Chromeless} = require('chromeless');
+
+const pathRoot = (...args) => path.join(__dirname, '../..', ...args);
 
 const indexHTML = path.relative(
     path.join(__dirname, '../..'),
@@ -17,15 +20,46 @@ let server;
 let chromeless;
 
 const miniServer = function (port = 8000) {
+    const fileCache = {};
+
+    function loadFile (fullPath) {
+        if (!fileCache[fullPath]) {
+            fileCache[fullPath] = readFile(fullPath)
+                .then(buffer => ({
+                    etag: createHash('md5')
+                        .update(buffer)
+                        .digest().base64Slice(),
+                    buffer
+                }));
+        }
+    }
+
     const server = http.createServer(async function (req, res) {
         try {
             const fullPath = path.join(__dirname, '../..', req.url);
-            res.end(await readFile(fullPath));
+            try {
+                loadFile(fullPath);
+                await fileCache[fullPath];
+            } catch (e) {
+                res.statusCode = 404;
+                res.end();
+            }
+
+            const {etag, buffer} = await fileCache[fullPath];
+            res.setHeader('etag', etag);
+            res.setHeader('cache-control', 'max-age=30');
+            if (req.headers['if-none-match'] === etag) {
+                res.statusCode = 304;
+            } else {
+                res.write(buffer);
+            }
+            res.end();
         } catch (e) {
-            res.statusCode = 404;
+            res.statusCode = 500;
             res.end();
         }
     });
+
     server.ready = new Promise(function (resolve) {
         server.on('listening', function () {
             resolve(server.address());
@@ -40,6 +74,7 @@ const miniServer = function (port = 8000) {
         }
     });
     server.listen(port);
+
     return server;
 };
 
@@ -57,8 +92,10 @@ module.exports = function (name, func) {
                 await Promise.race([
                     new Promise(resolve => setTimeout(resolve, 1000)),
                     new Promise(resolve => {
-                        chromeless.queue.chrome.chromeInstance.process
-                            .on('exit', resolve);
+                        if (chromeless.queue.chrome.chromeInstance.process) {
+                            chromeless.queue.chrome.chromeInstance.process
+                                .on('exit', resolve);
+                        }
                         chromeless.end();
                     })
                 ]);

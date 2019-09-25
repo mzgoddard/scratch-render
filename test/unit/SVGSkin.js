@@ -1,4 +1,4 @@
-const {add, resolver, or, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
+const {state, add, not, resolver, or, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
 const declareSkin = require('../fixtures/declare-Skin');
@@ -58,21 +58,35 @@ const createSVG = or([
 
 const createImage = createSVG;
 
-const setSVG = or([
-    add({
-        imageRotationCenter: true,
-        test: [function setSVG (context) {
-            context.imageRotationCenter = context.imageSize.map(dim => dim / 2);
-            context.skin.setSVG(context.imageSource);
-        }]
-    }),
-    add({
-        imageRotationCenter: true,
-        test: [function setSVG (context) {
-            context.imageRotationCenter = [10, 10];
-            context.skin.setSVG(context.imageSource, [10, 10]);
-        }]
-    })
+const setSVG = and([
+    or([
+        not(state('imageRotationCenter')),
+        and([
+            state('imageRotationCenter'),
+            add({
+                oldImageRotationCenter: true,
+                test: [function (context) {
+                    context.oldImageRotationCenter = context.imageRotationCenter;
+                }]
+            })
+        ])
+    ]),
+    or([
+        add({
+            imageRotationCenter: true,
+            test: [function setSVG (context) {
+                context.imageRotationCenter = context.imageSize.map(dim => dim / 2);
+                context.skin.setSVG(context.imageSource);
+            }]
+        }),
+        add({
+            imageRotationCenter: true,
+            test: [function setSVG (context) {
+                context.imageRotationCenter = [10, 10];
+                context.skin.setSVG(context.imageSource, [10, 10]);
+            }]
+        })
+    ])
 ]);
 
 const setImage = setSVG;

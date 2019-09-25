@@ -210,5 +210,7 @@ module.exports = {
     fail,
     pass,
     build,
-    buildPlan
+    buildPlan,
+    merge,
+    not
 };

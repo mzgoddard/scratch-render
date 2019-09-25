@@ -42,6 +42,9 @@ async function evaluate (t, chromeless, fn, ...args) {
 
 const fnMap = new WeakMap();
 
+const fs = require('fs');
+fs.removeSync(process.mainModule.filename + '.test');
+
 const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, after) {
     const tests = _tests.map(([fn, ...args]) => {
         let testFn = fnMap.get(fn);
@@ -62,16 +65,29 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
         }
         return [testFn, ...args];
     });
+    const fullTest = new Function(`
+        return async function (args) {
+            return [
+                ${tests.map(([fn, ...args], index) => `['comment', '${fn.name}(...${JSON.stringify(args)})'], ...(await (${fn.toString()})(...args[${index}]) || [])`)}
+            ];
+        };
+    `)();
+    const fullArgs = tests.map(([fn, ...args]) => args);
+    // console.log(fullTest.toString());
+    // process.exit(1);
     const builtTest = async function (t, chromeless) {
         t.plan(plan);
-        for (const [fn, ...args] of tests) {
-            t.comment(`evaluate ${fn.name}(...${JSON.stringify(args)})`);
-            await evaluate(t, chromeless, fn, ...args);
-        }
+        // for (const [fn, ...args] of tests) {
+        //     t.comment(`evaluate ${fn.name}(...${JSON.stringify(args)})`);
+        //     await evaluate(t, chromeless, fn, ...args);
+        // }
+        await evaluate(t, chromeless, fullTest, fullArgs);
     };
     Promise.resolve().then(() => {
         const file = /\/([^/]+)$/.exec(process.mainModule.filename)[1].split('.')[0];
-        chromelessTest(`${file} tests: ${tests.length} asserts: ${plan}`, builtTest);
+        const body = `chromelessTest('${file} tests: ${tests.length} asserts: ${plan}', builtTest);`;
+        fs.appendFileSync(process.mainModule.filename + '.test', body);
+        eval(body);
     });
     return each({...state, builtTest, plan, tests: _tests}, after);
 };
