@@ -1,4 +1,4 @@
-const {add, resolver, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
+const {or, add, resolver, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
 const declareSkin = require('../fixtures/declare-Skin');
@@ -15,9 +15,12 @@ const newSkin = and([
 ]);
 
 run(and([
-    call('skin'),
+    or([
+        call('skin'),
+        call('skinDispose')
+    ]),
     buildChromeless,
-    buildPlan(1)
+    buildPlan(2)
 ])({
     reports: [],
     resolver: resolver({

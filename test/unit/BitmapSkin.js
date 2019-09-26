@@ -1,0 +1,85 @@
+const {optional, state, add, not, resolver, or, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
+const {buildChromeless} = require('../fixtures/declare-chromeless');
+
+const {loadPNG} = require('../fixtures/declare-assets');
+const declareRenderWebGL = require('../fixtures/declare-RenderWebGL');
+const declareSkin = require('../fixtures/declare-Skin');
+
+const newBitmapSkin = and([
+    call('renderer'),
+    call('skinId'),
+    loadModule('BitmapSkin', './BitmapSkin.js'),
+    add({
+        concreteSkin: true,
+        name: 'new BitmapSkin',
+        test: [function newBitmapSkin (context) {
+            context.value = context.skin = new context.module.BitmapSkin(context.skinId, context.renderer);
+        }]
+    })
+]);
+
+const newSkin = newBitmapSkin;
+
+const createBitmap = or([
+    loadPNG('orange50x50.png', [50, 50]),
+    loadPNG('purple100x100.png', [100, 100]),
+    loadPNG('gradient50x50.png', [50, 50]),
+    loadPNG('gradient100x100.png', [100, 100])
+]);
+
+const createImage = createBitmap;
+
+const setBitmap = and([
+    // optional(state('imageRotationCenter'),
+    //     add({
+    //         oldImageRotationCenter: true,
+    //         test: [function setOldImageRotationCenter (context) {
+    //             context.oldImageRotationCenter = context.imageRotationCenter;
+    //         }]
+    //     })
+    // ),
+    or([
+        add(state => ({
+            imageRotationCenter: true,
+            name: `setBitmap(${state.imageName})`,
+            test: [function setBitmap (context) {
+                context.imageResolution = 2;
+                context.imageRotationCenter = context.imageSize.map(dim => dim / 2);
+                context.skin.setBitmap(context.imageSource);
+            }]
+        })),
+        add(state => ({
+            imageRotationCenter: true,
+            name: `setBitmap(${state.imageName}, [10, 10])`,
+            test: [function setBitmap_rotationCenter (context) {
+                context.imageResolution = 2;
+                context.imageRotationCenter = [10, 10];
+                context.skin.setBitmap(context.imageSource, context.imageResolution, [10, 10]);
+            }]
+        }))
+    ])
+]);
+
+const setImage = setBitmap;
+
+run(and([
+    or([
+        and([
+            add({eachPNG: true}),
+            call('skin'),
+        ]),
+        call('skinDispose'),
+        call('skinUpdate')
+    ]),
+    buildChromeless,
+    buildPlan(106)
+]), {
+    reports: [],
+    resolver: resolver({
+        ...declareRenderWebGL,
+        ...declareSkin,
+        createImage,
+        setImage,
+        newSkin,
+    }),
+});

@@ -86,14 +86,14 @@ const state = function (path, valueTest = value => value === true) {
     };
 };
 
-function getTest (context, key) {
-    return [['ok', key in context.value]];
+function hasProperty (context, key) {
+    return [['ok', key in context.value, `has ${key} property`]];
 };
 
 const get = function (key) {
     return add({
         plan: 1,
-        test: [getTest, key]
+        test: [hasProperty, key]
     });
 };
 
@@ -113,7 +113,7 @@ const call = function (name, _default = callDefault) {
 function loadModuleVarTest (context, name, srcPath) {
     context.module = context.module || {};
     context.module[name] = window['scratch-render'](srcPath);
-    return [['ok', context.module[name]]];
+    return [['ok', context.module[name], `module ${name} loaded`]];
 };
 
 const loadModuleVar = function (name, srcPath) {
@@ -121,9 +121,6 @@ const loadModuleVar = function (name, srcPath) {
         state(['module', name]),
         and([
             not(state(['module', name])),
-            // add({
-            //     tests: [[async function () {await new Promise(r => setTimeout(r, 10000))}]]
-            // }),
             add({
                 plan: 1,
                 module: {[name]: true},

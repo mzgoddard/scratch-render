@@ -1,4 +1,4 @@
-const {not, state, fail, and, get, add, call, or, pass} = require('./declare-tests');
+const {not, state, fail, and, get, add, call, or, pass, loadModule} = require('./declare-tests');
 const {willEmitEvent, didEmitEvent, eventsMembers} = require('./declare-events');
 
 const concrete = state('concreteSkin');
@@ -22,7 +22,7 @@ const skinInitialMembers = and([
     add({
         plan: 1,
         test: [function rotationCenterIsArray (context) {
-            return [['ok', context.value.rotationCenter.length >= 2]];
+            return [['ok', context.value.rotationCenter.length >= 2, 'rotationCenter is an array']];
         }]
     })
 ]);
@@ -38,7 +38,9 @@ const postChangeSkin = and([
             const {size} = context.skin;
             return [['same',
                 [Math.ceil(size[0]), Math.ceil(size[1])],
-                context.imageSize]];
+                context.imageSize,
+                'skin.size matches image size'
+            ]];
         }]
     }),
     get('rotationCenter'),
@@ -52,7 +54,9 @@ const postChangeSkin = and([
                     const {rotationCenter} = context.skin;
                     return [['same',
                         [Math.ceil(rotationCenter[0]), Math.ceil(rotationCenter[1])],
-                        context.oldImageRotationCenter, 'rotationCenter has not updated yet']];
+                        context.oldImageRotationCenter,
+                        'rotationCenter has not updated yet'
+                    ]];
                 }]
             })
         ])
@@ -69,7 +73,9 @@ const postAlterSkin = and([
             const {rotationCenter} = context.skin;
             return [['same',
                 [Math.ceil(rotationCenter[0]), Math.ceil(rotationCenter[1])],
-                context.imageRotationCenter]];
+                context.imageRotationCenter,
+                'skin.rotationCenter matches'
+            ]];
         }]
     })
 ]);
@@ -96,8 +102,27 @@ const skin = or([
     ])
 ])
 
+function dispose (context) {
+    context.skin.dispose();
+    return [['equal',
+        context.skin.id,
+        context.module.RenderConstants.ID_NONE,
+        'disposed of its id'
+    ]];
+}
+
+const skinDispose = and([
+    call('skin'),
+    loadModule('RenderConstants', './RenderConstants.js'),
+    add({
+        plan: 1,
+        name: 'dispose',
+        test: [dispose]
+    })
+]);
+
 const skinUpdate = and([
-    skin,
+    call('skin'),
     changeSkin
 ])
 
@@ -111,6 +136,7 @@ module.exports = {
     postAlterSkin,
     postChangeSkin,
     setImage,
+    skinDispose,
     skin,
     skinId,
     skinInitialMembers,

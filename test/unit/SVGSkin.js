@@ -1,26 +1,12 @@
 const {optional, state, add, not, resolver, or, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
+const {loadSVG} = require('../fixtures/declare-assets');
+const declareRenderWebGL = require('../fixtures/declare-RenderWebGL');
 const declareSkin = require('../fixtures/declare-Skin');
 
-const canvas = add({
-    test: [function createCanvas (context) {
-        context.canvas = document.createElement('canvas');
-    }]
-});
-
-const renderer = and([
-    loadModule('RenderWebGL', './RenderWebGL.js'),
-    canvas,
-    add({
-        test: [function newRenderWebGL (context) {
-            context.renderer = new context.module.RenderWebGL(context.canvas);
-        }]
-    })
-]);
-
 const newSVGSkin = and([
-    renderer,
+    call('renderer'),
     call('skinId'),
     loadModule('SVGSkin', './SVGSkin.js'),
     add({
@@ -30,26 +16,9 @@ const newSVGSkin = and([
             context.value = context.skin = new context.module.SVGSkin(context.skinId, context.renderer);
         }]
     })
-])
+]);
 
 const newSkin = newSVGSkin;
-
-const loadSVG = function (name, size) {
-    return add({
-        plan: 1,
-        imageSize: true,
-        imageName: name,
-        test: [async function loadSVG_fetch (context, name, size) {
-            context.imageSize = size;
-            context.imageSource = await fetch(`./assets/${name}`)
-                .then(response => response.text());
-            return [
-                ['comment', `fetch('./assets/${name}')`],
-                ['ok', typeof context.imageSource === 'string']
-            ];
-        }, name, size]
-    });
-};
 
 const createSVG = or([
     loadSVG('orange50x50.svg', [50, 50]),
@@ -61,8 +30,7 @@ const createSVG = or([
 const createImage = createSVG;
 
 const setSVG = and([
-    optional(
-        state('imageRotationCenter'),
+    optional(state('imageRotationCenter'),
         add({
             oldImageRotationCenter: true,
             test: [function setOldImageRotationCenter (context) {
@@ -93,12 +61,16 @@ const setSVG = and([
 const setImage = setSVG;
 
 run(and([
-    call('skinUpdate'),
+    or([
+        call('skinDispose'),
+        call('skinUpdate')
+    ]),
     buildChromeless,
-    buildPlan(72)
+    buildPlan(81)
 ]), {
     reports: [],
     resolver: resolver({
+        ...declareRenderWebGL,
         ...declareSkin,
         createImage,
         setImage,

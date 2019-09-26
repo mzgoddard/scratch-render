@@ -5,7 +5,7 @@ const eventsMembers = and([
     get('off')
 ]);
 
-const willEmitEventTest = function (context, event) {
+function willEmitEventTest (context, event) {
     context.event = context.event || {};
     context.event[event] = {
         called: false,
@@ -27,11 +27,11 @@ const willEmitEvent = function (event) {
     });
 };
 
-const didEmitEventTest = async function (context, event) {
+async function didEmitEventTest (context, event) {
     return [
         await Promise.race([
             context.event[event].calledPromise
-                .then(({called}) => (['ok', called])),
+                .then(({called}) => (['ok', called, `did emit ${event}`])),
             new Promise((resolve) => setTimeout(resolve, 100))
                 .then(() => (['fail', 'timeout']))
         ])
