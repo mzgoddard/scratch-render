@@ -1,5 +1,12 @@
 const chromelessTest = require('../fixtures/chromeless-tape');
 
+function register (fns) {
+   return `function () {
+       ${fns.map(fn => `(${fn.toString()})();
+`).join('')}
+   }`;
+}
+
 function register_call () {
     if (window.call) return;
     window.call = async function call (fn, context, args) {
@@ -146,9 +153,7 @@ function register_oldSkinRotationCenter () {
 chromelessTest('1: new SVGSkin, setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -184,9 +189,7 @@ chromelessTest('1: new SVGSkin, setSVG(orange50x50.svg)', async function (t, chr
 chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -222,9 +225,7 @@ chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg, [10, 10])', async functi
 chromelessTest('3: new SVGSkin, setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -260,9 +261,7 @@ chromelessTest('3: new SVGSkin, setSVG(purple100x100.svg)', async function (t, c
 chromelessTest('4: new SVGSkin, setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -298,9 +297,7 @@ chromelessTest('4: new SVGSkin, setSVG(purple100x100.svg, [10, 10])', async func
 chromelessTest('5: new SVGSkin, setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -336,9 +333,7 @@ chromelessTest('5: new SVGSkin, setSVG(gradient50x50.svg)', async function (t, c
 chromelessTest('6: new SVGSkin, setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -374,9 +369,7 @@ chromelessTest('6: new SVGSkin, setSVG(gradient50x50.svg, [10, 10])', async func
 chromelessTest('7: new SVGSkin, setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -412,9 +405,7 @@ chromelessTest('7: new SVGSkin, setSVG(gradient100x100.svg)', async function (t,
 chromelessTest('8: new SVGSkin, setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(15);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_getTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -450,9 +441,7 @@ chromelessTest('8: new SVGSkin, setSVG(gradient100x100.svg, [10, 10])', async fu
 chromelessTest('9: new SVGSkin, setSVG(orange50x50.svg), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -495,9 +484,7 @@ chromelessTest('9: new SVGSkin, setSVG(orange50x50.svg), setSVG(orange50x50.svg)
 chromelessTest('10: new SVGSkin, setSVG(orange50x50.svg), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -540,9 +527,7 @@ chromelessTest('10: new SVGSkin, setSVG(orange50x50.svg), setSVG(orange50x50.svg
 chromelessTest('11: new SVGSkin, setSVG(orange50x50.svg), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -585,9 +570,7 @@ chromelessTest('11: new SVGSkin, setSVG(orange50x50.svg), setSVG(purple100x100.s
 chromelessTest('12: new SVGSkin, setSVG(orange50x50.svg), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -630,9 +613,7 @@ chromelessTest('12: new SVGSkin, setSVG(orange50x50.svg), setSVG(purple100x100.s
 chromelessTest('13: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -675,9 +656,7 @@ chromelessTest('13: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient50x50.s
 chromelessTest('14: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -720,9 +699,7 @@ chromelessTest('14: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient50x50.s
 chromelessTest('15: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -765,9 +742,7 @@ chromelessTest('15: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient100x100
 chromelessTest('16: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -810,9 +785,7 @@ chromelessTest('16: new SVGSkin, setSVG(orange50x50.svg), setSVG(gradient100x100
 chromelessTest('17: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -855,9 +828,7 @@ chromelessTest('17: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(orang
 chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -900,9 +871,7 @@ chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(orang
 chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -945,9 +914,7 @@ chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(purpl
 chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -990,9 +957,7 @@ chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(purpl
 chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1035,9 +1000,7 @@ chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradi
 chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1080,9 +1043,7 @@ chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradi
 chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1125,9 +1086,7 @@ chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradi
 chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1170,9 +1129,7 @@ chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), setSVG(gradi
 chromelessTest('25: new SVGSkin, setSVG(purple100x100.svg), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1215,9 +1172,7 @@ chromelessTest('25: new SVGSkin, setSVG(purple100x100.svg), setSVG(orange50x50.s
 chromelessTest('26: new SVGSkin, setSVG(purple100x100.svg), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1260,9 +1215,7 @@ chromelessTest('26: new SVGSkin, setSVG(purple100x100.svg), setSVG(orange50x50.s
 chromelessTest('27: new SVGSkin, setSVG(purple100x100.svg), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1305,9 +1258,7 @@ chromelessTest('27: new SVGSkin, setSVG(purple100x100.svg), setSVG(purple100x100
 chromelessTest('28: new SVGSkin, setSVG(purple100x100.svg), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1350,9 +1301,7 @@ chromelessTest('28: new SVGSkin, setSVG(purple100x100.svg), setSVG(purple100x100
 chromelessTest('29: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1395,9 +1344,7 @@ chromelessTest('29: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient50x50
 chromelessTest('30: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1440,9 +1387,7 @@ chromelessTest('30: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient50x50
 chromelessTest('31: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1485,9 +1430,7 @@ chromelessTest('31: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient100x1
 chromelessTest('32: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1530,9 +1473,7 @@ chromelessTest('32: new SVGSkin, setSVG(purple100x100.svg), setSVG(gradient100x1
 chromelessTest('33: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1575,9 +1516,7 @@ chromelessTest('33: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(ora
 chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1620,9 +1559,7 @@ chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(ora
 chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1665,9 +1602,7 @@ chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(pur
 chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1710,9 +1645,7 @@ chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(pur
 chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1755,9 +1688,7 @@ chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gra
 chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1800,9 +1731,7 @@ chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gra
 chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1845,9 +1774,7 @@ chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gra
 chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1890,9 +1817,7 @@ chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), setSVG(gra
 chromelessTest('41: new SVGSkin, setSVG(gradient50x50.svg), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1935,9 +1860,7 @@ chromelessTest('41: new SVGSkin, setSVG(gradient50x50.svg), setSVG(orange50x50.s
 chromelessTest('42: new SVGSkin, setSVG(gradient50x50.svg), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1980,9 +1903,7 @@ chromelessTest('42: new SVGSkin, setSVG(gradient50x50.svg), setSVG(orange50x50.s
 chromelessTest('43: new SVGSkin, setSVG(gradient50x50.svg), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2025,9 +1946,7 @@ chromelessTest('43: new SVGSkin, setSVG(gradient50x50.svg), setSVG(purple100x100
 chromelessTest('44: new SVGSkin, setSVG(gradient50x50.svg), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2070,9 +1989,7 @@ chromelessTest('44: new SVGSkin, setSVG(gradient50x50.svg), setSVG(purple100x100
 chromelessTest('45: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2115,9 +2032,7 @@ chromelessTest('45: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient50x50
 chromelessTest('46: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2160,9 +2075,7 @@ chromelessTest('46: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient50x50
 chromelessTest('47: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2205,9 +2118,7 @@ chromelessTest('47: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient100x1
 chromelessTest('48: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2250,9 +2161,7 @@ chromelessTest('48: new SVGSkin, setSVG(gradient50x50.svg), setSVG(gradient100x1
 chromelessTest('49: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2295,9 +2204,7 @@ chromelessTest('49: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(ora
 chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2340,9 +2247,7 @@ chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(ora
 chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2385,9 +2290,7 @@ chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(pur
 chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2430,9 +2333,7 @@ chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(pur
 chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2475,9 +2376,7 @@ chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gra
 chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2520,9 +2419,7 @@ chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gra
 chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2565,9 +2462,7 @@ chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gra
 chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2610,9 +2505,7 @@ chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), setSVG(gra
 chromelessTest('57: new SVGSkin, setSVG(gradient100x100.svg), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2655,9 +2548,7 @@ chromelessTest('57: new SVGSkin, setSVG(gradient100x100.svg), setSVG(orange50x50
 chromelessTest('58: new SVGSkin, setSVG(gradient100x100.svg), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2700,9 +2591,7 @@ chromelessTest('58: new SVGSkin, setSVG(gradient100x100.svg), setSVG(orange50x50
 chromelessTest('59: new SVGSkin, setSVG(gradient100x100.svg), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2745,9 +2634,7 @@ chromelessTest('59: new SVGSkin, setSVG(gradient100x100.svg), setSVG(purple100x1
 chromelessTest('60: new SVGSkin, setSVG(gradient100x100.svg), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2790,9 +2677,7 @@ chromelessTest('60: new SVGSkin, setSVG(gradient100x100.svg), setSVG(purple100x1
 chromelessTest('61: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2835,9 +2720,7 @@ chromelessTest('61: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient50x
 chromelessTest('62: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2880,9 +2763,7 @@ chromelessTest('62: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient50x
 chromelessTest('63: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2925,9 +2806,7 @@ chromelessTest('63: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient100
 chromelessTest('64: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2970,9 +2849,7 @@ chromelessTest('64: new SVGSkin, setSVG(gradient100x100.svg), setSVG(gradient100
 chromelessTest('65: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(orange50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3015,9 +2892,7 @@ chromelessTest('65: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(o
 chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(orange50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3060,9 +2935,7 @@ chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(o
 chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(purple100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3105,9 +2978,7 @@ chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(p
 chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(purple100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3150,9 +3021,7 @@ chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(p
 chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(gradient50x50.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3195,9 +3064,7 @@ chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(g
 chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(gradient50x50.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_loadSVG_fetch, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3240,9 +3107,7 @@ chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(g
 chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(gradient100x100.svg)', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3285,9 +3150,7 @@ chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(g
 chromelessTest('72: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), setSVG(gradient100x100.svg, [10, 10])', async function (t, chromeless) {
     t.plan(19);
     
-    for (const fn of [register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]) {
-        await chromeless.evaluate(fn);
-    }
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadSVG_fetch, register_setSVG_rotationCenter, register_getTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {

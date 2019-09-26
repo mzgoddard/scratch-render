@@ -49,16 +49,23 @@ try {
 } catch (e) {}
 fs.appendFileSync(writtenFilename, [
     `const chromelessTest = require('../fixtures/chromeless-tape');`,
+    '',
+    'function register (fns) {',
+    '   return `function () {',
+    '       ${fns.map(fn => `(${fn.toString()})();\n`).join(\'\')}',
+    '   }`;',
+    '}',
 ].join('\n') + '\n');
 
 let nextId = 1;
 
 let fileUniqueNamedTests = [];
+const testsSoFar = [];
 
-async function register (chromeless, ...fns) {
-    for (const fn of fns) {
-        await chromeless.evaluate(fn);
-    }
+function register (fns) {
+    return `function () {
+        ${fns.map(fn => `(${fn.toString()})();\n`).join('')}
+    }`;
 }
 
 async function call (fn, context, args) {
@@ -134,24 +141,29 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
     fs.appendFileSync(writtenFilename, uniqueNamedTests.map(fn => indent(`\nfunction register_${fn.name} () {\nif (window.${fn.name}) return;\nwindow.${fn.name} = ${fn.toString()};\n}`)).join(''));
 
     const index = nextId++;
+    const file = /\/([^/]+)$/.exec(process.mainModule.filename)[1].split('.')[0];
+    const debugName = `${file} tests: ${tests.length} asserts: ${plan}`;
+    const name = `${index}: ${state.name || debugName}`;
+    const body = indent(`async function (t, chromeless) {
+        t.plan(${plan});
+        ${usedUniqueTestFns.length ? `
+            await chromeless.evaluate(register([${usedUniqueTestFns.map(fn => `register_${fn.name}`).join(', ')}]));
+        ` : ''}
+        return await chromeless.evaluate(${fullTest.toString()});
+    }`);
+    const testBody = `chromelessTest('${name}', ${body});`;
+    if (testsSoFar.includes(body)) {
+        throw new Error('Duplicate test produced');
+    }
+
     Promise.resolve().then(() => {
-        const file = /\/([^/]+)$/.exec(process.mainModule.filename)[1].split('.')[0];
-        const debugName = `${file} tests: ${tests.length} asserts: ${plan}`;
-        const name = `${index}: ${state.name || debugName}`;
-        const body = indent(`chromelessTest('${name}', async function (t, chromeless) {
-            t.plan(${plan});
-            ${usedUniqueTestFns.length ? `
-                for (const fn of [${usedUniqueTestFns.map(fn => `register_${fn.name}`).join(', ')}]) {
-                    await chromeless.evaluate(fn);
-                }
-            ` : ''}
-            return await chromeless.evaluate(${fullTest.toString()});
-        });`);
-        fs.appendFileSync(writtenFilename, '\n' + body);
+        fs.appendFileSync(writtenFilename, '\n' + testBody);
+
         eval(
+            register.toString() +
             usedUniqueTestFns
                 .map(fn => `\nfunction register_${fn.name} () {\nif (window.${fn.name}) return;\nwindow.${fn.name} = ${fn.toString()};\n}`).join('') +
-            body
+            testBody
         );
     });
     return each({...state, builtTest, plan, tests: _tests}, after);
