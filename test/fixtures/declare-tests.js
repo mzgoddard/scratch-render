@@ -2,6 +2,7 @@ const merge = function (s, t) {
     return {
         ...s,
         ...t,
+        name: (s.name || '') + (s.name && t.name ? ', ' : '') + (t.name || ''),
         plan: (s.plan || 0) + (t.plan || 0),
         module: {...s.module, ...t.module},
         tests: [...(s.tests || []), ...(t.tests || [])]
@@ -47,9 +48,17 @@ const not = function (f) {
     };
 };
 
-const add = function ({test, tests, ..._state}) {
-    tests = tests ? tests : test ? [test] : [];
+const optional = function (f, then) {
+    return or([
+        not(f),
+        and([f, then])
+    ]);
+};
+
+const add = function (addState) {
     return function _addScope (state, each, after) {
+        let {test, tests, ..._state} = typeof addState === 'function' ? addState(state) : addState;
+        tests = tests ? tests : test ? [test] : [];
         return each(merge(state, {..._state, tests}), after);
     };
 };
@@ -130,7 +139,8 @@ const afterEach = function (state, after) {
     return after;
 };
 
-const run = function (f) {
+const run = function (f, state = {}, each = afterEach, after = buildPlan.end) {
+    if (f) f = f(state, each, after);
     while (f) {
         const _f = f();
         if (_f && typeof _f !== 'function') {
@@ -201,6 +211,7 @@ buildPlan.end = function () {
 module.exports = {
     or,
     and,
+    optional,
     add,
     state,
     get,

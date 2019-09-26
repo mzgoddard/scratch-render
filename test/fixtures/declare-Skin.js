@@ -48,7 +48,7 @@ const postChangeSkin = and([
             state('oldImageRotationCenter'),
             add({
                 plan: 1,
-                test: [function skinRotationCenter (context) {
+                test: [function oldSkinRotationCenter (context) {
                     const {rotationCenter} = context.skin;
                     return [['same',
                         [Math.ceil(rotationCenter[0]), Math.ceil(rotationCenter[1])],
@@ -96,12 +96,9 @@ const skin = or([
     ])
 ])
 
-const skinUpdate = or([
+const skinUpdate = and([
     skin,
-    and([
-        skin,
-        changeSkin
-    ])
+    changeSkin
 ])
 
 module.exports = {

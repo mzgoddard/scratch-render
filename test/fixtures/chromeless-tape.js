@@ -144,6 +144,10 @@ module.exports = function (name, func) {
 
     if (!chromeless) {
         server = miniServer();
+        (async function () {
+            const {port} = await server.ready;
+            chromeless.goto(`http://localhost:${port}/${indexHTML}`);
+        }());
         chromeless = new Chromeless();
         teardown(async function () {
             try {
@@ -166,14 +170,23 @@ module.exports = function (name, func) {
 
     test(name, async function (t) {
         const {port} = await server.ready;
-        await chromeless.goto(`http://localhost:${port}/${indexHTML}`)
-            .wait('.loaded');
+        await chromeless.wait('.loaded');
         try {
-            await func(t, chromeless);
+            await chromeless.evaluate(function (name, coverage) {
+                document.querySelector('.test-title').innerText = name;
+                if (!window.__coverage__) window.__coverage__ = coverage;
+            }, name, global.__coverage__);
+            const results = await func(t, chromeless);
+            (results || []).map(([fn, ...args]) => {
+                if (t[fn]) t[fn](...args);
+            });
+            global.__coverage__ = await chromeless.evaluate(function () {
+                return window.__coverage__;
+            });
         } catch (e) {
-            console.error(e);
+            t.fail(e.stack || e.message || String(e));
         }
-        await chromeless.goto(`about:blank`);
+        // await chromeless.goto(`about:blank`);
         t.end();
     });
 };

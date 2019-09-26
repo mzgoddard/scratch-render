@@ -42,13 +42,31 @@ async function evaluate (t, chromeless, fn, ...args) {
 
 const fnMap = new WeakMap();
 
+const writtenFilename = /^(.*)\.js$/.exec(process.mainModule.filename)[1] + '.test.js';
 const fs = require('fs');
 try {
-    fs.unlinkSync(process.mainModule.filename + '.test');
+    fs.unlinkSync(writtenFilename);
 } catch (e) {}
-fs.appendFileSync(process.mainModule.filename + '.test', [
-    `const chromelessTest = require('../fixtures/chromeless-tape');`
-].join('\n') + '\n\n');
+fs.appendFileSync(writtenFilename, [
+    `const chromelessTest = require('../fixtures/chromeless-tape');`,
+].join('\n') + '\n');
+
+let nextId = 1;
+
+let fileUniqueNamedTests = [];
+
+async function register (chromeless, ...fns) {
+    for (const fn of fns) {
+        await chromeless.evaluate(fn);
+    }
+}
+
+async function call (fn, context, args) {
+    return [
+        ['comment', `${fn.name}(...${JSON.stringify(args)})`],
+        ...((await fn(context, ...args)) || [])
+    ];
+}
 
 const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, after) {
     const tests = _tests.map(([fn, ...args]) => {
@@ -70,14 +88,32 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
         }
         return [testFn, ...args];
     });
+    const testFns = [call, ..._tests.map(([fn]) => fn)];
+    const uniqueTestFns = testFns.filter((fn, i) => (
+        fn.name &&
+        !testFns.some((_fn, _i) => (_i < i && _fn === fn))
+    ));
+    const newFileUniqueNamedTests = uniqueTestFns.filter((fn, i) => (
+        fn.name &&
+        !fileUniqueNamedTests.some((_fn, _i) => (_fn.name === fn.name))
+    ));
+    const uniqueNamedTests = newFileUniqueNamedTests.filter((fn, i) => (
+        fn.name &&
+        !newFileUniqueNamedTests.some((_fn, _i) => (_i < i && _fn.name === fn.name))
+    ));
+    fileUniqueNamedTests.push(...uniqueNamedTests);
+    const usedUniqueTestFns = uniqueTestFns.filter(fn => fileUniqueNamedTests.some(_fn => _fn.toString() === fn.toString()));
+    // const testUniqueNamedTests = uniqueNamedTests.filter(fn => !fileUniqueNamedTests.some(_fn => _fn.name === fn.name));
+    // const uniqueNamedTests = [...fileUniqueNamedTests, ...testUniqueNamedTests];
+    // console.log(`${uniqueNamedTests.map(([fn]) => [fn.name, fn.toString()]).join('\n')}`);
+    // ${testUniqueNamedTests.map(fn => fn.toString().replace(/^(async )?function\s?\(/, `\$1function ${fn.name} (`)).join('\n')}
     const fullTest = new Function(`
         return async function (coverage) {
             try {
-                window.__coverage__ = coverage;
                 const context = {};
                 return [
-                    ${tests.map(([fn, ...args], index) => `['comment', '${fn.name}(...${JSON.stringify(args)})'],\n...(await (${_tests[index][0].toString()})(context, ...${JSON.stringify(args)}) || [])`).join(',\n')}
-                ].concat([['coverage', window.__coverage__]]);
+                    ${tests.map(([fn, ...args], index) => `...(await call(${fileUniqueNamedTests.some(fn => fn.toString() === _tests[index][0].toString()) ? _tests[index][0].name : _tests[index][0].toString()}, context, ${JSON.stringify(args)}))`).join(',\n')}
+                ];
             } catch (e) {
                 return [['fail', e.stack || e.message]];
             }
@@ -94,22 +130,29 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
         // }
         await evaluate(t, chromeless, fullTest, fullArgs);
     };
+
+    fs.appendFileSync(writtenFilename, uniqueNamedTests.map(fn => indent(`\nfunction register_${fn.name} () {\nif (window.${fn.name}) return;\nwindow.${fn.name} = ${fn.toString()};\n}`)).join(''));
+
+    const index = nextId++;
     Promise.resolve().then(() => {
         const file = /\/([^/]+)$/.exec(process.mainModule.filename)[1].split('.')[0];
-        const body = indent(`chromelessTest('${file} tests: ${tests.length} asserts: ${plan}', async function (t, chromeless) {
+        const debugName = `${file} tests: ${tests.length} asserts: ${plan}`;
+        const name = `${index}: ${state.name || debugName}`;
+        const body = indent(`chromelessTest('${name}', async function (t, chromeless) {
             t.plan(${plan});
-            try {
-                const results = await chromeless.evaluate(${fullTest.toString()}, global.__coverage__);
-                (results || []).map(([fn, ...args]) => {
-                    if (fn === 'coverage') global.__coverage__ = args[0];
-                    else if (t[fn]) t[fn](...args);
-                });
-            } catch (e) {
-                t.fail(e.stack || e.message || e);
-            }
+            ${usedUniqueTestFns.length ? `
+                for (const fn of [${usedUniqueTestFns.map(fn => `register_${fn.name}`).join(', ')}]) {
+                    await chromeless.evaluate(fn);
+                }
+            ` : ''}
+            return await chromeless.evaluate(${fullTest.toString()});
         });`);
-        fs.appendFileSync(process.mainModule.filename + '.test', body);
-        eval(body);
+        fs.appendFileSync(writtenFilename, '\n' + body);
+        eval(
+            usedUniqueTestFns
+                .map(fn => `\nfunction register_${fn.name} () {\nif (window.${fn.name}) return;\nwindow.${fn.name} = ${fn.toString()};\n}`).join('') +
+            body
+        );
     });
     return each({...state, builtTest, plan, tests: _tests}, after);
 };

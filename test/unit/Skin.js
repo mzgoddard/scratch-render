@@ -15,7 +15,7 @@ const newSkin = and([
 ]);
 
 run(and([
-    call('skinUpdate'),
+    call('skin'),
     buildChromeless,
     buildPlan(1)
 ])({
