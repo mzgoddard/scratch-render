@@ -224,8 +224,8 @@ chromelessTest('1: new SVGSkin, dispose', async function (t, chromeless) {
         }
     });
 });
-chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -251,8 +251,9 @@ chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -261,8 +262,8 @@ chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTextu
         }
     });
 });
-chromelessTest('3: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('3: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -288,8 +289,9 @@ chromelessTest('3: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1)
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -298,8 +300,8 @@ chromelessTest('3: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1)
         }
     });
 });
-chromelessTest('4: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('4: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -325,8 +327,9 @@ chromelessTest('4: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTex
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -335,8 +338,8 @@ chromelessTest('4: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTex
         }
     });
 });
-chromelessTest('5: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('5: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -362,8 +365,9 @@ chromelessTest('5: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -372,8 +376,8 @@ chromelessTest('5: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(
         }
     });
 });
-chromelessTest('6: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('6: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -399,8 +403,9 @@ chromelessTest('6: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTex
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -409,8 +414,8 @@ chromelessTest('6: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTex
         }
     });
 });
-chromelessTest('7: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('7: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -436,8 +441,9 @@ chromelessTest('7: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -446,8 +452,8 @@ chromelessTest('7: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(
         }
     });
 });
-chromelessTest('8: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('8: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -473,8 +479,9 @@ chromelessTest('8: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getT
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -483,8 +490,8 @@ chromelessTest('8: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getT
         }
     });
 });
-chromelessTest('9: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), dispose', async function (t, chromeless) {
-    t.plan(19);
+chromelessTest('9: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
+    t.plan(22);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
@@ -510,8 +517,9 @@ chromelessTest('9: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextur
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))
             ];
@@ -520,8 +528,8 @@ chromelessTest('9: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextur
         }
     });
 });
-chromelessTest('10: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('10: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -554,16 +562,17 @@ chromelessTest('10: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('11: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('11: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -596,16 +605,17 @@ chromelessTest('11: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('12: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('12: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -638,16 +648,17 @@ chromelessTest('12: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('13: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('13: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -680,16 +691,17 @@ chromelessTest('13: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('14: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('14: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -722,16 +734,17 @@ chromelessTest('14: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('15: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('15: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -764,16 +777,17 @@ chromelessTest('15: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('16: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('16: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -806,16 +820,17 @@ chromelessTest('16: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('17: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(24);
+chromelessTest('17: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(27);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
@@ -848,16 +863,17 @@ chromelessTest('17: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -883,8 +899,9 @@ chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -899,16 +916,17 @@ chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -934,8 +952,9 @@ chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -950,16 +969,17 @@ chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -985,8 +1005,9 @@ chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1001,16 +1022,17 @@ chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1036,8 +1058,9 @@ chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1052,16 +1075,17 @@ chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1087,8 +1111,9 @@ chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1103,16 +1128,17 @@ chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1138,8 +1164,9 @@ chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1154,16 +1181,17 @@ chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1189,8 +1217,9 @@ chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1205,16 +1234,17 @@ chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('25: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('25: new SVGSkin, setSVG(orange50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1240,8 +1270,9 @@ chromelessTest('25: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1256,16 +1287,17 @@ chromelessTest('25: new SVGSkin, setSVG(orange50x50.svg), getTexture(1), getText
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('26: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('26: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1291,8 +1323,9 @@ chromelessTest('26: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1307,16 +1340,17 @@ chromelessTest('26: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('27: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('27: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1342,8 +1376,9 @@ chromelessTest('27: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1358,16 +1393,17 @@ chromelessTest('27: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('28: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('28: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1393,8 +1429,9 @@ chromelessTest('28: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1409,16 +1446,17 @@ chromelessTest('28: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('29: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('29: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1444,8 +1482,9 @@ chromelessTest('29: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1460,16 +1499,17 @@ chromelessTest('29: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('30: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('30: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1495,8 +1535,9 @@ chromelessTest('30: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1511,16 +1552,17 @@ chromelessTest('30: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('31: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('31: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1546,8 +1588,9 @@ chromelessTest('31: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1562,16 +1605,17 @@ chromelessTest('31: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('32: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('32: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1597,8 +1641,9 @@ chromelessTest('32: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1613,16 +1658,17 @@ chromelessTest('32: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('33: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('33: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1648,8 +1694,9 @@ chromelessTest('33: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1664,16 +1711,17 @@ chromelessTest('33: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(1
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1699,8 +1747,9 @@ chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1715,16 +1764,17 @@ chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1750,8 +1800,9 @@ chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1766,16 +1817,17 @@ chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1801,8 +1853,9 @@ chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1817,16 +1870,17 @@ chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1852,8 +1906,9 @@ chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -1868,16 +1923,17 @@ chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -1903,8 +1959,9 @@ chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1919,16 +1976,17 @@ chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -1954,8 +2012,9 @@ chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -1970,16 +2029,17 @@ chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2005,8 +2065,9 @@ chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2021,16 +2082,17 @@ chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('41: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('41: new SVGSkin, setSVG(purple100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2056,8 +2118,9 @@ chromelessTest('41: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2072,16 +2135,17 @@ chromelessTest('41: new SVGSkin, setSVG(purple100x100.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('42: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('42: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2107,8 +2171,9 @@ chromelessTest('42: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2123,16 +2188,17 @@ chromelessTest('42: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('43: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('43: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2158,8 +2224,9 @@ chromelessTest('43: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2174,16 +2241,17 @@ chromelessTest('43: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('44: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('44: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2209,8 +2277,9 @@ chromelessTest('44: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2225,16 +2294,17 @@ chromelessTest('44: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('45: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('45: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2260,8 +2330,9 @@ chromelessTest('45: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2276,16 +2347,17 @@ chromelessTest('45: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('46: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('46: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2311,8 +2383,9 @@ chromelessTest('46: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2327,16 +2400,17 @@ chromelessTest('46: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('47: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('47: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2362,8 +2436,9 @@ chromelessTest('47: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2378,16 +2453,17 @@ chromelessTest('47: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('48: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('48: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2413,8 +2489,9 @@ chromelessTest('48: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2429,16 +2506,17 @@ chromelessTest('48: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('49: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('49: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2464,8 +2542,9 @@ chromelessTest('49: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2480,16 +2559,17 @@ chromelessTest('49: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2515,8 +2595,9 @@ chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2531,16 +2612,17 @@ chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2566,8 +2648,9 @@ chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2582,16 +2665,17 @@ chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2617,8 +2701,9 @@ chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2633,16 +2718,17 @@ chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2668,8 +2754,9 @@ chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2684,16 +2771,17 @@ chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2719,8 +2807,9 @@ chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2735,16 +2824,17 @@ chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2770,8 +2860,9 @@ chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2786,16 +2877,17 @@ chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2821,8 +2913,9 @@ chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2837,16 +2930,17 @@ chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('57: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('57: new SVGSkin, setSVG(gradient50x50.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2872,8 +2966,9 @@ chromelessTest('57: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -2888,16 +2983,17 @@ chromelessTest('57: new SVGSkin, setSVG(gradient50x50.svg), getTexture(1), getTe
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('58: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('58: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -2923,8 +3019,9 @@ chromelessTest('58: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2939,16 +3036,17 @@ chromelessTest('58: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('59: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('59: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -2974,8 +3072,9 @@ chromelessTest('59: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -2990,16 +3089,17 @@ chromelessTest('59: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('60: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('60: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3025,8 +3125,9 @@ chromelessTest('60: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3041,16 +3142,17 @@ chromelessTest('60: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('61: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('61: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3076,8 +3178,9 @@ chromelessTest('61: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3092,16 +3195,17 @@ chromelessTest('61: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('62: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('62: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3127,8 +3231,9 @@ chromelessTest('62: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3143,16 +3248,17 @@ chromelessTest('62: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('63: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('63: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3178,8 +3284,9 @@ chromelessTest('63: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3194,16 +3301,17 @@ chromelessTest('63: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('64: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('64: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3229,8 +3337,9 @@ chromelessTest('64: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3245,16 +3354,17 @@ chromelessTest('64: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('65: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('65: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3280,8 +3390,9 @@ chromelessTest('65: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3296,16 +3407,17 @@ chromelessTest('65: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3331,8 +3443,9 @@ chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3347,16 +3460,17 @@ chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3382,8 +3496,9 @@ chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3398,16 +3513,17 @@ chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3433,8 +3549,9 @@ chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3449,16 +3566,17 @@ chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3484,8 +3602,9 @@ chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3500,16 +3619,17 @@ chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3535,8 +3655,9 @@ chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3551,16 +3672,17 @@ chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3586,8 +3708,9 @@ chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3602,16 +3725,17 @@ chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('72: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('72: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3637,8 +3761,9 @@ chromelessTest('72: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3653,16 +3778,17 @@ chromelessTest('72: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('73: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('73: new SVGSkin, setSVG(gradient100x100.svg), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3688,8 +3814,9 @@ chromelessTest('73: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3704,16 +3831,17 @@ chromelessTest('73: new SVGSkin, setSVG(gradient100x100.svg), getTexture(1), get
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('74: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('74: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3739,8 +3867,9 @@ chromelessTest('74: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3755,16 +3884,17 @@ chromelessTest('74: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('75: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(orange50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('75: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3790,8 +3920,9 @@ chromelessTest('75: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3806,16 +3937,17 @@ chromelessTest('75: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('76: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('76: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3841,8 +3973,9 @@ chromelessTest('76: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3857,16 +3990,17 @@ chromelessTest('76: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('77: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(purple100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('77: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3892,8 +4026,9 @@ chromelessTest('77: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["purple100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -3908,16 +4043,17 @@ chromelessTest('77: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('78: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('78: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -3943,8 +4079,9 @@ chromelessTest('78: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -3959,16 +4096,17 @@ chromelessTest('78: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('79: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient50x50.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('79: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -3994,8 +4132,9 @@ chromelessTest('79: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient50x50.svg"])),
                 ...(await call(storeImageSize, context, [[50,50]])),
@@ -4010,16 +4149,17 @@ chromelessTest('79: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('80: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('80: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG, register_oldSkinRotationCenter]));
     
@@ -4045,8 +4185,9 @@ chromelessTest('80: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -4061,16 +4202,17 @@ chromelessTest('80: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];
         }
     });
 });
-chromelessTest('81: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2), setSVG(gradient100x100.svg, [10, 10]), getTexture(1), getTexture(2)', async function (t, chromeless) {
-    t.plan(33);
+chromelessTest('81: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(undefined), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture([200,200]), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
+    t.plan(39);
     
     await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newSVGSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_setSVG_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setOldImageRotationCenter, register_setSVG_rotationCenter, register_oldSkinRotationCenter]));
     
@@ -4096,8 +4238,9 @@ chromelessTest('81: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2])),
+                ...(await call(texture, context, [null])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
                 ...(await call(loadAsset_fetch, context, ["gradient100x100.svg"])),
                 ...(await call(storeImageSize, context, [[100,100]])),
@@ -4112,8 +4255,9 @@ chromelessTest('81: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [1])),
-                ...(await call(texture, context, [2]))
+                ...(await call(texture, context, [[200,200]])),
+                ...(await call(texture, context, [[100,100]])),
+                ...(await call(texture, context, [[200,200]]))
             ];
         } catch (e) {
             return [['fail', e.stack || e.message]];

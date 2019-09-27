@@ -1,4 +1,4 @@
-const {not, state, fail, every, hasProperty, evaluate, call, some, pass, loadModule} = require('./declare-tests');
+const {not, state, fail, every, hasProperty, evaluate, call, some, pass, value, loadModule} = require('./declare-tests');
 const {willEmitEvent, didEmitEvent, eventsMembers} = require('./declare-events');
 
 const concrete = state('concreteSkin');
@@ -17,6 +17,7 @@ const skinId = evaluate({
     }]
 });
 const skinInitialMembers = every([
+    value('skin'),
     hasProperty('id'),
     hasProperty('rotationCenter'),
     hasProperty('isRaster'),
@@ -32,6 +33,7 @@ const willEmitWasAltered = willEmitEvent('WasAltered');
 // const willEmitWasAltered = pass;
 
 const postChangeSkin = every([
+    value('skin'),
     hasProperty('size'),
     state('imageSize'),
     evaluate({
@@ -75,6 +77,7 @@ function skinRotationCenter (context) {
 }
 
 const postAlterSkin = every([
+    value('skin'),
     hasProperty('size'),
     hasProperty('rotationCenter'),
     state('imageRotationCenter'),
@@ -96,8 +99,8 @@ function texture (context, scale) {
 
 const getTexture = evaluate(state => ({
     plan: 3,
-    name: `getTexture(${state.scale || 1})`,
-    test: [texture, state.scale || 1],
+    name: `getTexture(${JSON.stringify(state.scale)})`,
+    test: [texture, state.scale],
 }));
 
 const changeSkin = every([
@@ -114,6 +117,7 @@ const changeSkin = every([
 const skin = some([
     every([
         newSkin,
+        value('skin'),
         call('eventsMembers'),
         call('skinInitialMembers')
     ]),

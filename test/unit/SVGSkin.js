@@ -1,4 +1,4 @@
-const {optional, state, evaluate, not, resolver, some, every, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
+const {optional, state, evaluate, not, resolver, some, every, call, run, build, loadModule, buildPlan, afterEach, value} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
 const {loadSVG} = require('../fixtures/declare-assets');
@@ -19,13 +19,6 @@ const newSVGSkin = every([
 ]);
 
 const newSkin = newSVGSkin;
-
-const createSVG = some([
-    loadSVG('orange50x50.svg', [50, 50]),
-    loadSVG('purple100x100.svg', [100, 100]),
-    loadSVG('gradient50x50.svg', [50, 50]),
-    loadSVG('gradient100x100.svg', [100, 100])
-]);
 
 const createImage = createSVG;
 
@@ -61,13 +54,15 @@ const setSVG = every([
 const setImage = setSVG;
 
 const getTexture = every([
-    evaluate({scale: 1}),
     declareSkin.getTexture,
-    evaluate({scale: 2}),
+    evaluate({scale: [100, 100]}),
+    declareSkin.getTexture,
+    evaluate({scale: [200, 200]}),
     declareSkin.getTexture
 ]);
 
 run(every([
+    evaluate({everySVG: true})
     some([
         call('skinDispose'),
         call('skinUpdate')

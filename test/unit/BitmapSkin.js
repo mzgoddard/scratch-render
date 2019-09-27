@@ -20,13 +20,6 @@ const newBitmapSkin = every([
 
 const newSkin = newBitmapSkin;
 
-const createBitmap = some([
-    loadPNG('orange50x50.png', [50, 50]),
-    loadPNG('purple100x100.png', [100, 100]),
-    loadPNG('gradient50x50.png', [50, 50]),
-    loadPNG('gradient100x100.png', [100, 100])
-]);
-
 const createImage = createBitmap;
 
 const setBitmap = every([
@@ -55,9 +48,10 @@ const setBitmap = every([
 const setImage = setBitmap;
 
 run(every([
+    evaluate({everyBitmap: true}),
     some([
         every([
-            evaluate({eachPNG: true}),
+            evaluate({everyImageLoader: true}),
             call('skin'),
         ]),
         call('skinDispose'),

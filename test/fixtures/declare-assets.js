@@ -69,6 +69,7 @@ async function loadPNG_imageBitmap (context) {
 
 const loadPNG = function (name, size) {
     return every([
+        evaluate({bitmapImage: true}),
         loadAsset(name),
         imageSize(size),
         evaluate({imageName: name}),
@@ -78,7 +79,7 @@ const loadPNG = function (name, size) {
         }),
         some([
             every([
-                state('eachPNG'),
+                state('everyImageLoader'),
                 evaluate({
                     plan: 1,
                     name: 'new Image',
@@ -111,6 +112,7 @@ async function loadSVG_text (context) {
 
 const loadSVG = function (name, size) {
     return every([
+        evaluate({svgImage: true}),
         loadAsset(name),
         imageSize(size),
         evaluate({
@@ -121,7 +123,39 @@ const loadSVG = function (name, size) {
     ]);
 };
 
+const createBitmap = some([
+    loadPNG('orange50x50.png', [50, 50]),
+    every([
+        state('everyBitmap'),
+        some([
+            loadPNG('purple100x100.png', [100, 100]),
+            loadPNG('gradient50x50.png', [50, 50]),
+            loadPNG('gradient100x100.png', [100, 100])
+        ])
+    ])
+]);
+
+const createSVG = some([
+    loadSVG('orange50x50.svg', [50, 50]),
+    every([
+        state('everySVG'),
+        some([
+            loadSVG('purple100x100.svg', [100, 100]),
+            loadSVG('gradient50x50.svg', [50, 50]),
+            loadSVG('gradient100x100.svg', [100, 100])
+        ]),
+    ])
+]);
+
+const createImage = some([
+    createBitmap,
+    createSVG
+]);
+
 module.exports = {
     loadPNG,
-    loadSVG
+    loadSVG,
+    createBitmap,
+    createSVG,
+    createImage
 };

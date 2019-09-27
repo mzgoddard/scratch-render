@@ -86,6 +86,18 @@ const state = function (path, valueTest = value => value === true) {
     };
 };
 
+function valueTest (context, key) {
+    context.value = context[key];
+    return [['ok', typeof context.value !== 'undefined', 'context.value is set']];
+}
+
+const value = function (key) {
+    return evaluate({
+        plan: 1,
+        test: [valueTest, key]
+    });
+};
+
 function hasPropertyTest (context, key) {
     // Test that this does not throw.
     context.value[key];
@@ -213,6 +225,7 @@ module.exports = {
     optional,
     evaluate,
     state,
+    value,
     hasProperty,
     resolver,
     call,
