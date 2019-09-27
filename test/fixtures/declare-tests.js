@@ -35,8 +35,8 @@ const _reduceRight = function (fn) {
     };
 };
 
-const or = _reduceRight(_or);
-const and = _reduceRight(_and);
+const some = _reduceRight(_or);
+const every = _reduceRight(_and);
 
 const not = function (f) {
     return function (state, each, after) {
@@ -49,13 +49,13 @@ const not = function (f) {
 };
 
 const optional = function (f, then) {
-    return or([
+    return some([
         not(f),
-        and([f, then])
+        every([f, then])
     ]);
 };
 
-const add = function (addState) {
+const evaluate = function (addState) {
     return function _addScope (state, each, after) {
         let {test, tests, ..._state} = typeof addState === 'function' ? addState(state) : addState;
         tests = tests ? tests : test ? [test] : [];
@@ -86,14 +86,16 @@ const state = function (path, valueTest = value => value === true) {
     };
 };
 
-function hasProperty (context, key) {
+function hasPropertyTest (context, key) {
+    // Test that this does not throw.
+    context.value[key];
     return [['ok', key in context.value, `has ${key} property`]];
 };
 
-const get = function (key) {
-    return add({
+const hasProperty = function (key) {
+    return evaluate({
         plan: 1,
-        test: [hasProperty, key]
+        test: [hasPropertyTest, key]
     });
 };
 
@@ -112,16 +114,16 @@ const call = function (name, _default = callDefault) {
 
 function loadModuleVarTest (context, name, srcPath) {
     context.module = context.module || {};
-    context.module[name] = window['scratch-render'](srcPath);
+    context.module[name] = window.ScratchRenderFiles(srcPath);
     return [['ok', context.module[name], `module ${name} loaded`]];
 };
 
 const loadModuleVar = function (name, srcPath) {
-    return or([
+    return some([
         state(['module', name]),
-        and([
+        every([
             not(state(['module', name])),
-            add({
+            evaluate({
                 plan: 1,
                 module: {[name]: true},
                 tests: [[loadModuleVarTest, name, srcPath]]
@@ -206,12 +208,12 @@ buildPlan.end = function () {
 };
 
 module.exports = {
-    or,
-    and,
+    some,
+    every,
     optional,
-    add,
+    evaluate,
     state,
-    get,
+    hasProperty,
     resolver,
     call,
     afterEach,

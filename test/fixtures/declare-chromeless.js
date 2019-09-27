@@ -158,7 +158,7 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
 
     Promise.resolve().then(() => {
         fs.appendFileSync(writtenFilename, '\n' + testBody);
-
+        return;
         eval(
             register.toString() +
             usedUniqueTestFns

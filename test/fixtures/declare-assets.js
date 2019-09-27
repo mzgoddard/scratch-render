@@ -1,4 +1,4 @@
-const {pass, or, and, add, optional, state} = require('./declare-tests');
+const {pass, some, every, evaluate, optional, state} = require('./declare-tests');
 
 async function loadAsset_fetch (context, name) {
     context.assetResponse = await fetch(`./assets/${name}`);
@@ -9,7 +9,7 @@ async function loadAsset_fetch (context, name) {
 }
 
 const loadAsset = function (name) {
-    return add({
+    return evaluate({
         plan: 1,
         assetName: name,
         test: [loadAsset_fetch, name]
@@ -21,7 +21,7 @@ function storeImageSize (context, size) {
 }
 
 const imageSize = function (size) {
-    return add({
+    return evaluate({
         imageSize: true,
         test: [storeImageSize, size]
     });
@@ -68,32 +68,32 @@ async function loadPNG_imageBitmap (context) {
 }
 
 const loadPNG = function (name, size) {
-    return and([
+    return every([
         loadAsset(name),
         imageSize(size),
-        add({imageName: name}),
-        add({
+        evaluate({imageName: name}),
+        evaluate({
             plan: 1,
             test: [loadPNG_arrayBuffer]
         }),
-        or([
-            and([
+        some([
+            every([
                 state('eachPNG'),
-                add({
+                evaluate({
                     plan: 1,
                     name: 'new Image',
                     test: [loadPNG_image]
                 }),
-                or([
+                some([
                     pass,
-                    add({
+                    evaluate({
                         plan: 1,
                         name: 'HTMLCanvasElement',
                         test: [loadPNG_canvas]
                     })
                 ])
             ]),
-            add({
+            evaluate({
                 plan: 1,
                 name: 'createImageBitmap',
                 test: [loadPNG_imageBitmap]
@@ -110,10 +110,10 @@ async function loadSVG_text (context) {
 }
 
 const loadSVG = function (name, size) {
-    return and([
+    return every([
         loadAsset(name),
         imageSize(size),
-        add({
+        evaluate({
             plan: 1,
             imageName: name,
             test: [loadSVG_text]

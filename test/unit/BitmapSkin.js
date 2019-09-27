@@ -1,15 +1,15 @@
-const {optional, state, add, not, resolver, or, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
+const {optional, state, evaluate, not, resolver, some, every, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
 const {loadPNG} = require('../fixtures/declare-assets');
 const declareRenderWebGL = require('../fixtures/declare-RenderWebGL');
 const declareSkin = require('../fixtures/declare-Skin');
 
-const newBitmapSkin = and([
+const newBitmapSkin = every([
     call('renderer'),
     call('skinId'),
     loadModule('BitmapSkin', './BitmapSkin.js'),
-    add({
+    evaluate({
         concreteSkin: true,
         name: 'new BitmapSkin',
         test: [function newBitmapSkin (context) {
@@ -20,7 +20,7 @@ const newBitmapSkin = and([
 
 const newSkin = newBitmapSkin;
 
-const createBitmap = or([
+const createBitmap = some([
     loadPNG('orange50x50.png', [50, 50]),
     loadPNG('purple100x100.png', [100, 100]),
     loadPNG('gradient50x50.png', [50, 50]),
@@ -29,17 +29,9 @@ const createBitmap = or([
 
 const createImage = createBitmap;
 
-const setBitmap = and([
-    // optional(state('imageRotationCenter'),
-    //     add({
-    //         oldImageRotationCenter: true,
-    //         test: [function setOldImageRotationCenter (context) {
-    //             context.oldImageRotationCenter = context.imageRotationCenter;
-    //         }]
-    //     })
-    // ),
-    or([
-        add(state => ({
+const setBitmap = every([
+    some([
+        evaluate(state => ({
             imageRotationCenter: true,
             name: `setBitmap(${state.imageName})`,
             test: [function setBitmap (context) {
@@ -48,9 +40,9 @@ const setBitmap = and([
                 context.skin.setBitmap(context.imageSource);
             }]
         })),
-        add(state => ({
+        evaluate(state => ({
             imageRotationCenter: true,
-            name: `setBitmap(${state.imageName}, [10, 10])`,
+            name: `setBitmap(${state.imageName}, 2, [10, 10])`,
             test: [function setBitmap_rotationCenter (context) {
                 context.imageResolution = 2;
                 context.imageRotationCenter = [10, 10];
@@ -62,10 +54,10 @@ const setBitmap = and([
 
 const setImage = setBitmap;
 
-run(and([
-    or([
-        and([
-            add({eachPNG: true}),
+run(every([
+    some([
+        every([
+            evaluate({eachPNG: true}),
             call('skin'),
         ]),
         call('skinDispose'),

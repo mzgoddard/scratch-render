@@ -20,7 +20,7 @@ function register_loadModuleVarTest () {
     if (window.loadModuleVarTest) return;
     window.loadModuleVarTest = function loadModuleVarTest (context, name, srcPath) {
         context.module = context.module || {};
-        context.module[name] = window['scratch-render'](srcPath);
+        context.module[name] = window.ScratchRenderFiles(srcPath);
         return [['ok', context.module[name], `module ${name} loaded`]];
     };
 }
@@ -36,9 +36,11 @@ function register_newSkinTest () {
         context.value = context.skin = new context.module.Skin(context.skinId);
     };
 }
-function register_hasProperty () {
-    if (window.hasProperty) return;
-    window.hasProperty = function hasProperty (context, key) {
+function register_hasPropertyTest () {
+    if (window.hasPropertyTest) return;
+    window.hasPropertyTest = function hasPropertyTest (context, key) {
+        // Test that this does not throw.
+        context.value[key];
         return [['ok', key in context.value, `has ${key} property`]];
     };
 }
@@ -59,10 +61,10 @@ function register_dispose () {
         ]];
     };
 }
-chromelessTest('1: Skin tests: 8 asserts: 6', async function (t, chromeless) {
-    t.plan(6);
+chromelessTest('1: new Skin', async function (t, chromeless) {
+    t.plan(8);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_skinIdTest, register_newSkinTest, register_hasProperty, register_rotationCenterIsArray]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_skinIdTest, register_newSkinTest, register_hasPropertyTest, register_rotationCenterIsArray]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -71,10 +73,12 @@ chromelessTest('1: Skin tests: 8 asserts: 6', async function (t, chromeless) {
                 ...(await call(loadModuleVarTest, context, ["Skin","./Skin.js"])),
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(newSkinTest, context, [])),
-                ...(await call(hasProperty, context, ["on"])),
-                ...(await call(hasProperty, context, ["off"])),
-                ...(await call(hasProperty, context, ["id"])),
-                ...(await call(hasProperty, context, ["rotationCenter"])),
+                ...(await call(hasPropertyTest, context, ["on"])),
+                ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(hasPropertyTest, context, ["id"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(hasPropertyTest, context, ["isRaster"])),
+                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
                 ...(await call(rotationCenterIsArray, context, []))
             ];
         } catch (e) {
@@ -82,10 +86,10 @@ chromelessTest('1: Skin tests: 8 asserts: 6', async function (t, chromeless) {
         }
     });
 });
-chromelessTest('2: dispose', async function (t, chromeless) {
-    t.plan(8);
+chromelessTest('2: new Skin, dispose', async function (t, chromeless) {
+    t.plan(10);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_skinIdTest, register_newSkinTest, register_hasProperty, register_rotationCenterIsArray, register_dispose]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_skinIdTest, register_newSkinTest, register_hasPropertyTest, register_rotationCenterIsArray, register_dispose]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -94,10 +98,12 @@ chromelessTest('2: dispose', async function (t, chromeless) {
                 ...(await call(loadModuleVarTest, context, ["Skin","./Skin.js"])),
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(newSkinTest, context, [])),
-                ...(await call(hasProperty, context, ["on"])),
-                ...(await call(hasProperty, context, ["off"])),
-                ...(await call(hasProperty, context, ["id"])),
-                ...(await call(hasProperty, context, ["rotationCenter"])),
+                ...(await call(hasPropertyTest, context, ["on"])),
+                ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(hasPropertyTest, context, ["id"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(hasPropertyTest, context, ["isRaster"])),
+                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
                 ...(await call(rotationCenterIsArray, context, [])),
                 ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
                 ...(await call(dispose, context, []))

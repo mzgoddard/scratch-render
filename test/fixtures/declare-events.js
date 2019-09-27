@@ -1,8 +1,8 @@
-const {state, fail, and, get, add, call, or, pass} = require('./declare-tests');
+const {state, fail, every, hasProperty, evaluate, call, some, pass} = require('./declare-tests');
 
-const eventsMembers = and([
-    get('on'),
-    get('off')
+const eventsMembers = every([
+    hasProperty('on'),
+    hasProperty('off')
 ]);
 
 function willEmitEventTest (context, event) {
@@ -22,7 +22,7 @@ function willEmitEventTest (context, event) {
 };
 
 const willEmitEvent = function (event) {
-    return add({
+    return evaluate({
         test: [willEmitEventTest, event]
     });
 };
@@ -39,7 +39,7 @@ async function didEmitEventTest (context, event) {
 };
 
 const didEmitEvent = function (event) {
-    return add({
+    return evaluate({
         plan: 1,
         test: [didEmitEventTest, event]
     });

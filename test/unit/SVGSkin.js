@@ -1,15 +1,15 @@
-const {optional, state, add, not, resolver, or, and, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
+const {optional, state, evaluate, not, resolver, some, every, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
 const {loadSVG} = require('../fixtures/declare-assets');
 const declareRenderWebGL = require('../fixtures/declare-RenderWebGL');
 const declareSkin = require('../fixtures/declare-Skin');
 
-const newSVGSkin = and([
+const newSVGSkin = every([
     call('renderer'),
     call('skinId'),
     loadModule('SVGSkin', './SVGSkin.js'),
-    add({
+    evaluate({
         concreteSkin: true,
         name: 'new SVGSkin',
         test: [function newSVGSkin (context) {
@@ -20,7 +20,7 @@ const newSVGSkin = and([
 
 const newSkin = newSVGSkin;
 
-const createSVG = or([
+const createSVG = some([
     loadSVG('orange50x50.svg', [50, 50]),
     loadSVG('purple100x100.svg', [100, 100]),
     loadSVG('gradient50x50.svg', [50, 50]),
@@ -29,17 +29,17 @@ const createSVG = or([
 
 const createImage = createSVG;
 
-const setSVG = and([
+const setSVG = every([
     optional(state('imageRotationCenter'),
-        add({
+        evaluate({
             oldImageRotationCenter: true,
             test: [function setOldImageRotationCenter (context) {
                 context.oldImageRotationCenter = context.imageRotationCenter;
             }]
         })
     ),
-    or([
-        add(state => ({
+    some([
+        evaluate(state => ({
             imageRotationCenter: true,
             name: `setSVG(${state.imageName})`,
             test: [function setSVG (context) {
@@ -47,7 +47,7 @@ const setSVG = and([
                 context.skin.setSVG(context.imageSource);
             }]
         })),
-        add(state => ({
+        evaluate(state => ({
             imageRotationCenter: true,
             name: `setSVG(${state.imageName}, [10, 10])`,
             test: [function setSVG_rotationCenter (context) {
@@ -60,8 +60,15 @@ const setSVG = and([
 
 const setImage = setSVG;
 
-run(and([
-    or([
+const getTexture = every([
+    evaluate({scale: 1}),
+    declareSkin.getTexture,
+    evaluate({scale: 2}),
+    declareSkin.getTexture
+]);
+
+run(every([
+    some([
         call('skinDispose'),
         call('skinUpdate')
     ]),
@@ -75,5 +82,6 @@ run(and([
         createImage,
         setImage,
         newSkin,
+        getTexture
     }),
 });
