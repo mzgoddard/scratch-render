@@ -74,14 +74,13 @@ module.exports = [
         }
     }) : null,
     // Web-test-compatible
-    NODE_ENV === 'test' ? Object.assign({}, base, {
+    NODE_ENV !== 'production' ? Object.assign({}, base, {
         target: 'web',
         entry: {
-            'scratch-render': './test/fixtures/src-files.js',
-            'tape': 'tape'
+            'scratch-render': './test/fixtures/src-files.js'
         },
         output: {
-            library: '[name]',
+            library: 'ScratchRenderFiles',
             libraryTarget: 'umd',
             path: path.resolve('dist', 'test'),
             filename: '[name].js'
