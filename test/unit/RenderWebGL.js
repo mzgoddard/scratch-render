@@ -7,6 +7,7 @@ const declareSkin = require('../fixtures/declare-Skin');
 
 run(every([
     some([
+        call('renderer'),
         every([
             evaluate({
                 everyImageLoader: true
@@ -15,10 +16,12 @@ run(every([
         ]),
         every([
             call('rendererUpdateSkin')
-        ])
+        ]),
+        call('rendererUpdateDrawableSkin'),
+        call('rendererDraw')
     ]),
     buildChromeless,
-    // buildPlan(81)
+    buildPlan(72)
 ]), {
     reports: [],
     resolver: resolver({

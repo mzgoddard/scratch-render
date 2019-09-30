@@ -48,6 +48,13 @@ function register_newBitmapSkin () {
         context.value = context.skin = new context.module.BitmapSkin(context.skinId, context.renderer);
     };
 }
+function register_valueTest () {
+    if (window.valueTest) return;
+    window.valueTest = function valueTest (context, key) {
+        context.value = context[key];
+        return [['ok', typeof context.value !== 'undefined', 'context.value is set']];
+    };
+}
 function register_hasPropertyTest () {
     if (window.hasPropertyTest) return;
     window.hasPropertyTest = function hasPropertyTest (context, key) {
@@ -219,9 +226,9 @@ function register_dispose () {
     };
 }
 chromelessTest('1: new BitmapSkin', async function (t, chromeless) {
-    t.plan(9);
+    t.plan(11);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -233,8 +240,10 @@ chromelessTest('1: new BitmapSkin', async function (t, chromeless) {
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -247,9 +256,9 @@ chromelessTest('1: new BitmapSkin', async function (t, chromeless) {
     });
 });
 chromelessTest('2: new BitmapSkin, new Image, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
+    t.plan(17);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -267,10 +276,12 @@ chromelessTest('2: new BitmapSkin, new Image, setBitmap(orange50x50.png), getTex
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_image, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -282,9 +293,9 @@ chromelessTest('2: new BitmapSkin, new Image, setBitmap(orange50x50.png), getTex
     });
 });
 chromelessTest('3: new BitmapSkin, new Image, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
+    t.plan(17);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -302,10 +313,12 @@ chromelessTest('3: new BitmapSkin, new Image, setBitmap(orange50x50.png, 2, [10,
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_image, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -317,9 +330,9 @@ chromelessTest('3: new BitmapSkin, new Image, setBitmap(orange50x50.png, 2, [10,
     });
 });
 chromelessTest('4: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
+    t.plan(18);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -338,10 +351,12 @@ chromelessTest('4: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orang
                 ...(await call(loadPNG_image, context, [])),
                 ...(await call(loadPNG_canvas, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -353,9 +368,9 @@ chromelessTest('4: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orang
     });
 });
 chromelessTest('5: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
+    t.plan(18);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -374,10 +389,12 @@ chromelessTest('5: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orang
                 ...(await call(loadPNG_image, context, [])),
                 ...(await call(loadPNG_canvas, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -389,9 +406,9 @@ chromelessTest('5: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orang
     });
 });
 chromelessTest('6: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
+    t.plan(17);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -409,10 +426,12 @@ chromelessTest('6: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png)
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -424,710 +443,78 @@ chromelessTest('6: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png)
     });
 });
 chromelessTest('7: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('8: new BitmapSkin, new Image, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('9: new BitmapSkin, new Image, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('10: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(loadPNG_canvas, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('11: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(loadPNG_canvas, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('12: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('13: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('14: new BitmapSkin, new Image, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('15: new BitmapSkin, new Image, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('16: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(loadPNG_canvas, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('17: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(loadPNG_canvas, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('18: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('19: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('20: new BitmapSkin, new Image, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('21: new BitmapSkin, new Image, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('22: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(loadPNG_canvas, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('23: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(16);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(loadPNG_canvas, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('24: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('25: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(15);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('26: new BitmapSkin, dispose', async function (t, chromeless) {
-    t.plan(11);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_dispose]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-                ...(await call(dispose, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('27: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), dispose', async function (t, chromeless) {
     t.plan(17);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    
+    return await chromeless.evaluate(async function (coverage) {
+        try {
+            const context = {};
+            return [
+                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+                ...(await call(createCanvas, context, [])),
+                ...(await call(newRenderWebGL, context, [])),
+                ...(await call(skinIdTest, context, [])),
+                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+                ...(await call(newBitmapSkin, context, [])),
+                ...(await call(willEmitEventTest, context, ["WasAltered"])),
+                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
+                ...(await call(loadPNG_arrayBuffer, context, [])),
+                ...(await call(loadPNG_imageBitmap, context, [])),
+                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(skinSize, context, [])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(skinRotationCenter, context, [])),
+                ...(await call(texture, context, [null]))
+            ];
+        } catch (e) {
+            return [['fail', e.stack || e.message]];
+        }
+    });
+});
+chromelessTest('8: new BitmapSkin, dispose', async function (t, chromeless) {
+    t.plan(13);
+    
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_dispose]));
+    
+    return await chromeless.evaluate(async function (coverage) {
+        try {
+            const context = {};
+            return [
+                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+                ...(await call(createCanvas, context, [])),
+                ...(await call(newRenderWebGL, context, [])),
+                ...(await call(skinIdTest, context, [])),
+                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+                ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["on"])),
+                ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["id"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(hasPropertyTest, context, ["isRaster"])),
+                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+                ...(await call(rotationCenterIsArray, context, [])),
+                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
+                ...(await call(dispose, context, []))
+            ];
+        } catch (e) {
+            return [['fail', e.stack || e.message]];
+        }
+    });
+});
+chromelessTest('9: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), dispose', async function (t, chromeless) {
+    t.plan(19);
+    
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1145,10 +532,12 @@ chromelessTest('27: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1161,10 +550,10 @@ chromelessTest('27: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('28: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), dispose', async function (t, chromeless) {
-    t.plan(17);
+chromelessTest('10: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), dispose', async function (t, chromeless) {
+    t.plan(19);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1182,10 +571,12 @@ chromelessTest('28: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1198,47 +589,10 @@ chromelessTest('28: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('29: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), dispose', async function (t, chromeless) {
-    t.plan(17);
+chromelessTest('11: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-                ...(await call(dispose, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('30: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), dispose', async function (t, chromeless) {
-    t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1250,193 +604,10 @@ chromelessTest('30: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-                ...(await call(dispose, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('31: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), dispose', async function (t, chromeless) {
-    t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-                ...(await call(dispose, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('32: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), dispose', async function (t, chromeless) {
-    t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-                ...(await call(dispose, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('33: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), dispose', async function (t, chromeless) {
-    t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-                ...(await call(dispose, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('34: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), dispose', async function (t, chromeless) {
-    t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_dispose]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-                ...(await call(dispose, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('35: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1448,10 +619,12 @@ chromelessTest('35: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1462,10 +635,10 @@ chromelessTest('35: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('36: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
+chromelessTest('12: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1477,8 +650,10 @@ chromelessTest('36: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1490,10 +665,12 @@ chromelessTest('36: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1504,10 +681,10 @@ chromelessTest('36: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('37: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
+chromelessTest('13: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1519,8 +696,10 @@ chromelessTest('37: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1532,10 +711,12 @@ chromelessTest('37: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1546,10 +727,10 @@ chromelessTest('37: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('38: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
+chromelessTest('14: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1561,8 +742,10 @@ chromelessTest('38: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1574,10 +757,12 @@ chromelessTest('38: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1588,10 +773,10 @@ chromelessTest('38: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('39: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
+chromelessTest('15: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1603,8 +788,10 @@ chromelessTest('39: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1616,10 +803,12 @@ chromelessTest('39: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1630,10 +819,10 @@ chromelessTest('39: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('40: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
+chromelessTest('16: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1645,8 +834,10 @@ chromelessTest('40: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1658,10 +849,12 @@ chromelessTest('40: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1672,10 +865,10 @@ chromelessTest('40: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('41: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
+chromelessTest('17: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1687,8 +880,10 @@ chromelessTest('41: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1700,10 +895,12 @@ chromelessTest('41: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1714,10 +911,10 @@ chromelessTest('41: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('42: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(22);
+chromelessTest('18: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(26);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_valueTest, register_hasPropertyTest, register_rotationCenterIsArray, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1729,8 +926,10 @@ chromelessTest('42: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(skinIdTest, context, [])),
                 ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
                 ...(await call(newBitmapSkin, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["on"])),
                 ...(await call(hasPropertyTest, context, ["off"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["id"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(hasPropertyTest, context, ["isRaster"])),
@@ -1742,10 +941,12 @@ chromelessTest('42: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1756,59 +957,10 @@ chromelessTest('42: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('43: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('19: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('44: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1826,10 +978,12 @@ chromelessTest('44: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1839,11 +993,13 @@ chromelessTest('44: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(storeImageSize, context, [[50,50]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1854,59 +1010,10 @@ chromelessTest('44: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('45: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('20: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('46: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1924,24 +1031,28 @@ chromelessTest('46: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -1952,10 +1063,10 @@ chromelessTest('46: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('47: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('21: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -1973,24 +1084,28 @@ chromelessTest('47: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
+                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+                ...(await call(storeImageSize, context, [[100,100]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2001,10 +1116,10 @@ chromelessTest('47: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('48: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('22: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2022,24 +1137,28 @@ chromelessTest('48: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
+                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+                ...(await call(storeImageSize, context, [[100,100]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2050,10 +1169,10 @@ chromelessTest('48: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('49: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('23: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2071,24 +1190,28 @@ chromelessTest('49: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2099,10 +1222,10 @@ chromelessTest('49: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('50: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('24: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2120,24 +1243,28 @@ chromelessTest('50: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2148,10 +1275,116 @@ chromelessTest('50: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('51: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('25: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    
+    return await chromeless.evaluate(async function (coverage) {
+        try {
+            const context = {};
+            return [
+                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+                ...(await call(createCanvas, context, [])),
+                ...(await call(newRenderWebGL, context, [])),
+                ...(await call(skinIdTest, context, [])),
+                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+                ...(await call(newBitmapSkin, context, [])),
+                ...(await call(willEmitEventTest, context, ["WasAltered"])),
+                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
+                ...(await call(loadPNG_arrayBuffer, context, [])),
+                ...(await call(loadPNG_imageBitmap, context, [])),
+                ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(skinSize, context, [])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(skinRotationCenter, context, [])),
+                ...(await call(texture, context, [null])),
+                ...(await call(willEmitEventTest, context, ["WasAltered"])),
+                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadPNG_arrayBuffer, context, [])),
+                ...(await call(loadPNG_imageBitmap, context, [])),
+                ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(skinSize, context, [])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(skinRotationCenter, context, [])),
+                ...(await call(texture, context, [null]))
+            ];
+        } catch (e) {
+            return [['fail', e.stack || e.message]];
+        }
+    });
+});
+chromelessTest('26: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
+    
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    
+    return await chromeless.evaluate(async function (coverage) {
+        try {
+            const context = {};
+            return [
+                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+                ...(await call(createCanvas, context, [])),
+                ...(await call(newRenderWebGL, context, [])),
+                ...(await call(skinIdTest, context, [])),
+                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+                ...(await call(newBitmapSkin, context, [])),
+                ...(await call(willEmitEventTest, context, ["WasAltered"])),
+                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
+                ...(await call(loadPNG_arrayBuffer, context, [])),
+                ...(await call(loadPNG_imageBitmap, context, [])),
+                ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(skinSize, context, [])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(skinRotationCenter, context, [])),
+                ...(await call(texture, context, [null])),
+                ...(await call(willEmitEventTest, context, ["WasAltered"])),
+                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadPNG_arrayBuffer, context, [])),
+                ...(await call(loadPNG_imageBitmap, context, [])),
+                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(skinSize, context, [])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(skinRotationCenter, context, [])),
+                ...(await call(texture, context, [null]))
+            ];
+        } catch (e) {
+            return [['fail', e.stack || e.message]];
+        }
+    });
+});
+chromelessTest('27: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
+    
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2169,10 +1402,12 @@ chromelessTest('51: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2183,10 +1418,12 @@ chromelessTest('51: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2197,59 +1434,10 @@ chromelessTest('51: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('52: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('28: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(skinIdTest, context, [])),
-                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
-                ...(await call(newBitmapSkin, context, [])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(skinSize, context, [])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(texture, context, [null]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
-});
-chromelessTest('53: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2267,24 +1455,28 @@ chromelessTest('53: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
+                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2295,10 +1487,10 @@ chromelessTest('53: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('54: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('29: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2316,10 +1508,12 @@ chromelessTest('54: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2329,11 +1523,13 @@ chromelessTest('54: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(storeImageSize, context, [[100,100]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2344,10 +1540,10 @@ chromelessTest('54: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('55: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('30: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2365,24 +1561,28 @@ chromelessTest('55: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
+                ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+                ...(await call(storeImageSize, context, [[100,100]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
+                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2393,10 +1593,10 @@ chromelessTest('55: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('56: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('31: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2414,10 +1614,12 @@ chromelessTest('56: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2427,11 +1629,13 @@ chromelessTest('56: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(storeImageSize, context, [[50,50]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2442,10 +1646,10 @@ chromelessTest('56: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('57: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('32: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2463,24 +1667,28 @@ chromelessTest('57: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
                 ...(await call(texture, context, [null])),
                 ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
-                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap, context, [])),
+                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2491,10 +1699,10 @@ chromelessTest('57: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('58: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('33: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2512,10 +1720,12 @@ chromelessTest('58: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2525,11 +1735,13 @@ chromelessTest('58: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
                 ...(await call(storeImageSize, context, [[100,100]])),
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2540,10 +1752,63 @@ chromelessTest('58: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png
         }
     });
 });
-chromelessTest('59: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('34: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    
+    return await chromeless.evaluate(async function (coverage) {
+        try {
+            const context = {};
+            return [
+                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+                ...(await call(createCanvas, context, [])),
+                ...(await call(newRenderWebGL, context, [])),
+                ...(await call(skinIdTest, context, [])),
+                ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+                ...(await call(newBitmapSkin, context, [])),
+                ...(await call(willEmitEventTest, context, ["WasAltered"])),
+                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+                ...(await call(storeImageSize, context, [[50,50]])),
+                ...(await call(loadPNG_arrayBuffer, context, [])),
+                ...(await call(loadPNG_imageBitmap, context, [])),
+                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(skinSize, context, [])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(skinRotationCenter, context, [])),
+                ...(await call(texture, context, [null])),
+                ...(await call(willEmitEventTest, context, ["WasAltered"])),
+                ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+                ...(await call(storeImageSize, context, [[100,100]])),
+                ...(await call(loadPNG_arrayBuffer, context, [])),
+                ...(await call(loadPNG_imageBitmap, context, [])),
+                ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(skinSize, context, [])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
+                ...(await call(hasPropertyTest, context, ["size"])),
+                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+                ...(await call(skinRotationCenter, context, [])),
+                ...(await call(texture, context, [null]))
+            ];
+        } catch (e) {
+            return [['fail', e.stack || e.message]];
+        }
+    });
+});
+chromelessTest('35: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
+    
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2561,10 +1826,12 @@ chromelessTest('59: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2575,10 +1842,12 @@ chromelessTest('59: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2589,10 +1858,10 @@ chromelessTest('59: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('60: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('36: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2610,10 +1879,12 @@ chromelessTest('60: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2624,10 +1895,12 @@ chromelessTest('60: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2638,10 +1911,10 @@ chromelessTest('60: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('61: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('37: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2659,10 +1932,12 @@ chromelessTest('61: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2673,10 +1948,12 @@ chromelessTest('61: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2687,10 +1964,10 @@ chromelessTest('61: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('62: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('38: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2708,10 +1985,12 @@ chromelessTest('62: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2722,10 +2001,12 @@ chromelessTest('62: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2736,10 +2017,10 @@ chromelessTest('62: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('63: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('39: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2757,10 +2038,12 @@ chromelessTest('63: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2771,10 +2054,12 @@ chromelessTest('63: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2785,10 +2070,10 @@ chromelessTest('63: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('64: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('40: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2806,10 +2091,12 @@ chromelessTest('64: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2820,10 +2107,12 @@ chromelessTest('64: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2834,10 +2123,10 @@ chromelessTest('64: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('65: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('41: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2855,10 +2144,12 @@ chromelessTest('65: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2869,10 +2160,12 @@ chromelessTest('65: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2883,10 +2176,10 @@ chromelessTest('65: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('66: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('42: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2904,10 +2197,12 @@ chromelessTest('66: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2918,10 +2213,12 @@ chromelessTest('66: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2932,10 +2229,10 @@ chromelessTest('66: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('67: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('43: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -2953,10 +2250,12 @@ chromelessTest('67: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2967,10 +2266,12 @@ chromelessTest('67: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -2981,10 +2282,10 @@ chromelessTest('67: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('68: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('44: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3002,10 +2303,12 @@ chromelessTest('68: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3016,10 +2319,12 @@ chromelessTest('68: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3030,10 +2335,10 @@ chromelessTest('68: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('69: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('45: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3051,10 +2356,12 @@ chromelessTest('69: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3065,10 +2372,12 @@ chromelessTest('69: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3079,10 +2388,10 @@ chromelessTest('69: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('70: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('46: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3100,10 +2409,12 @@ chromelessTest('70: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3114,10 +2425,12 @@ chromelessTest('70: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3128,10 +2441,10 @@ chromelessTest('70: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('71: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('47: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3149,10 +2462,12 @@ chromelessTest('71: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3163,10 +2478,12 @@ chromelessTest('71: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3177,10 +2494,10 @@ chromelessTest('71: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('72: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('48: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3198,10 +2515,12 @@ chromelessTest('72: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3212,10 +2531,12 @@ chromelessTest('72: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3226,10 +2547,10 @@ chromelessTest('72: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('73: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('49: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3247,10 +2568,12 @@ chromelessTest('73: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3261,10 +2584,12 @@ chromelessTest('73: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3275,10 +2600,10 @@ chromelessTest('73: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('74: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('50: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3296,10 +2621,12 @@ chromelessTest('74: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3310,10 +2637,12 @@ chromelessTest('74: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3324,10 +2653,10 @@ chromelessTest('74: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.p
         }
     });
 });
-chromelessTest('75: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('51: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3345,10 +2674,12 @@ chromelessTest('75: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3359,10 +2690,12 @@ chromelessTest('75: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3373,10 +2706,10 @@ chromelessTest('75: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('76: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('52: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3394,10 +2727,12 @@ chromelessTest('76: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3408,10 +2743,12 @@ chromelessTest('76: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3422,10 +2759,10 @@ chromelessTest('76: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('77: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('53: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3443,10 +2780,12 @@ chromelessTest('77: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3457,10 +2796,12 @@ chromelessTest('77: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3471,10 +2812,10 @@ chromelessTest('77: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('78: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('54: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3492,10 +2833,12 @@ chromelessTest('78: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3506,10 +2849,12 @@ chromelessTest('78: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3520,10 +2865,10 @@ chromelessTest('78: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('79: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('55: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3541,10 +2886,12 @@ chromelessTest('79: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3555,10 +2902,12 @@ chromelessTest('79: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3569,10 +2918,10 @@ chromelessTest('79: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('80: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('56: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3590,10 +2939,12 @@ chromelessTest('80: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3604,10 +2955,12 @@ chromelessTest('80: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3618,10 +2971,10 @@ chromelessTest('80: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('81: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('57: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3639,10 +2992,12 @@ chromelessTest('81: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3653,10 +3008,12 @@ chromelessTest('81: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3667,10 +3024,10 @@ chromelessTest('81: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('82: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('58: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3688,10 +3045,12 @@ chromelessTest('82: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3702,10 +3061,12 @@ chromelessTest('82: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3716,10 +3077,10 @@ chromelessTest('82: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('83: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('59: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3737,10 +3098,12 @@ chromelessTest('83: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3751,10 +3114,12 @@ chromelessTest('83: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3765,10 +3130,10 @@ chromelessTest('83: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('84: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('60: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3786,10 +3151,12 @@ chromelessTest('84: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3800,10 +3167,12 @@ chromelessTest('84: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3814,10 +3183,10 @@ chromelessTest('84: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('85: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('61: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3835,10 +3204,12 @@ chromelessTest('85: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3849,10 +3220,12 @@ chromelessTest('85: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3863,10 +3236,10 @@ chromelessTest('85: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('86: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('62: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3884,10 +3257,12 @@ chromelessTest('86: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3898,10 +3273,12 @@ chromelessTest('86: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3912,10 +3289,10 @@ chromelessTest('86: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('87: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('63: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3933,10 +3310,12 @@ chromelessTest('87: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3947,10 +3326,12 @@ chromelessTest('87: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3961,10 +3342,10 @@ chromelessTest('87: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('88: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('64: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -3982,10 +3363,12 @@ chromelessTest('88: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -3996,10 +3379,12 @@ chromelessTest('88: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4010,10 +3395,10 @@ chromelessTest('88: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('89: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('65: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4031,10 +3416,12 @@ chromelessTest('89: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4045,10 +3432,12 @@ chromelessTest('89: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4059,10 +3448,10 @@ chromelessTest('89: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('90: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('66: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4080,10 +3469,12 @@ chromelessTest('90: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4094,10 +3485,12 @@ chromelessTest('90: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4108,10 +3501,10 @@ chromelessTest('90: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.p
         }
     });
 });
-chromelessTest('91: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('67: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4129,10 +3522,12 @@ chromelessTest('91: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4143,10 +3538,12 @@ chromelessTest('91: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4157,10 +3554,10 @@ chromelessTest('91: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('92: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('68: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4178,10 +3575,12 @@ chromelessTest('92: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4192,10 +3591,12 @@ chromelessTest('92: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4206,10 +3607,10 @@ chromelessTest('92: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('93: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('69: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4227,10 +3628,12 @@ chromelessTest('93: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4241,10 +3644,12 @@ chromelessTest('93: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4255,10 +3660,10 @@ chromelessTest('93: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('94: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('70: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4276,10 +3681,12 @@ chromelessTest('94: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4290,10 +3697,12 @@ chromelessTest('94: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4304,10 +3713,10 @@ chromelessTest('94: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('95: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('71: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4325,10 +3734,12 @@ chromelessTest('95: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4339,10 +3750,12 @@ chromelessTest('95: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4353,10 +3766,10 @@ chromelessTest('95: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('96: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('72: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4374,10 +3787,12 @@ chromelessTest('96: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4388,10 +3803,12 @@ chromelessTest('96: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4402,10 +3819,10 @@ chromelessTest('96: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('97: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('73: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4423,10 +3840,12 @@ chromelessTest('97: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4437,10 +3856,12 @@ chromelessTest('97: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4451,10 +3872,10 @@ chromelessTest('97: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('98: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('74: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4472,10 +3893,12 @@ chromelessTest('98: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4486,10 +3909,12 @@ chromelessTest('98: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4500,10 +3925,10 @@ chromelessTest('98: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('99: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('75: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4521,10 +3946,12 @@ chromelessTest('99: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4535,10 +3962,12 @@ chromelessTest('99: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4549,10 +3978,10 @@ chromelessTest('99: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100
         }
     });
 });
-chromelessTest('100: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('76: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4570,10 +3999,12 @@ chromelessTest('100: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4584,10 +4015,12 @@ chromelessTest('100: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4598,10 +4031,10 @@ chromelessTest('100: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
         }
     });
 });
-chromelessTest('101: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('77: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4619,10 +4052,12 @@ chromelessTest('101: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4633,10 +4068,12 @@ chromelessTest('101: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4647,10 +4084,10 @@ chromelessTest('101: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
         }
     });
 });
-chromelessTest('102: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('78: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4668,10 +4105,12 @@ chromelessTest('102: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4682,10 +4121,12 @@ chromelessTest('102: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4696,10 +4137,10 @@ chromelessTest('102: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
         }
     });
 });
-chromelessTest('103: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('79: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4717,10 +4158,12 @@ chromelessTest('103: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4731,10 +4174,12 @@ chromelessTest('103: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4745,10 +4190,10 @@ chromelessTest('103: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
         }
     });
 });
-chromelessTest('104: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('80: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4766,10 +4211,12 @@ chromelessTest('104: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4780,10 +4227,12 @@ chromelessTest('104: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4794,10 +4243,10 @@ chromelessTest('104: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
         }
     });
 });
-chromelessTest('105: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('81: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4815,10 +4264,12 @@ chromelessTest('105: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4829,10 +4280,12 @@ chromelessTest('105: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4843,10 +4296,10 @@ chromelessTest('105: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
         }
     });
 });
-chromelessTest('106: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
-    t.plan(28);
+chromelessTest('82: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(undefined)', async function (t, chromeless) {
+    t.plan(32);
     
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
+    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_skinIdTest, register_newBitmapSkin, register_willEmitEventTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_setBitmap_rotationCenter, register_valueTest, register_hasPropertyTest, register_skinSize, register_didEmitEventTest, register_skinRotationCenter, register_texture, register_setBitmap_rotationCenter]));
     
     return await chromeless.evaluate(async function (coverage) {
         try {
@@ -4864,10 +4317,12 @@ chromelessTest('106: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),
@@ -4878,10 +4333,12 @@ chromelessTest('106: new BitmapSkin, createImageBitmap, setBitmap(gradient100x10
                 ...(await call(loadPNG_arrayBuffer, context, [])),
                 ...(await call(loadPNG_imageBitmap, context, [])),
                 ...(await call(setBitmap_rotationCenter, context, [])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(skinSize, context, [])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(didEmitEventTest, context, ["WasAltered"])),
+                ...(await call(valueTest, context, ["skin"])),
                 ...(await call(hasPropertyTest, context, ["size"])),
                 ...(await call(hasPropertyTest, context, ["rotationCenter"])),
                 ...(await call(skinRotationCenter, context, [])),

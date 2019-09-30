@@ -63,7 +63,7 @@ const evaluate = function (addState) {
     };
 };
 
-const state = function (path, valueTest = value => value === true) {
+const state = function (path, valueTest = value => Boolean(value)) {
     return function _stateScope (state, each, after) {
         let value = state;
         if (typeof path === 'string') value = value[path];
@@ -124,6 +124,16 @@ const call = function (name, _default = callDefault) {
     };
 };
 
+const init = function (state, fn) {
+    return some([
+        state,
+        every([
+            not(state),
+            fn
+        ])
+    ]);
+};
+
 function loadModuleVarTest (context, name, srcPath) {
     context.module = context.module || {};
     context.module[name] = window.ScratchRenderFiles(srcPath);
@@ -131,17 +141,11 @@ function loadModuleVarTest (context, name, srcPath) {
 };
 
 const loadModuleVar = function (name, srcPath) {
-    return some([
-        state(['module', name]),
-        every([
-            not(state(['module', name])),
-            evaluate({
-                plan: 1,
-                module: {[name]: true},
-                tests: [[loadModuleVarTest, name, srcPath]]
-            })
-        ])
-    ]);
+    return init(state(['module', name]), evaluate({
+        plan: 1,
+        module: {[name]: true},
+        tests: [[loadModuleVarTest, name, srcPath]]
+    }));
 };
 
 const loadModule = loadModuleVar;
@@ -238,5 +242,6 @@ module.exports = {
     build,
     buildPlan,
     merge,
-    not
+    not,
+    init
 };

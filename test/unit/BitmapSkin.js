@@ -1,7 +1,7 @@
 const {optional, state, evaluate, not, resolver, some, every, call, run, build, loadModule, buildPlan, afterEach} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
-const {loadPNG} = require('../fixtures/declare-assets');
+const declareAssets = require('../fixtures/declare-assets');
 const declareRenderWebGL = require('../fixtures/declare-RenderWebGL');
 const declareSkin = require('../fixtures/declare-Skin');
 
@@ -20,9 +20,9 @@ const newBitmapSkin = every([
 
 const newSkin = newBitmapSkin;
 
-const createImage = createBitmap;
-
 const setBitmap = every([
+    state('bitmapImage'),
+    not(state('svgImage')),
     some([
         evaluate(state => ({
             imageRotationCenter: true,
@@ -48,23 +48,25 @@ const setBitmap = every([
 const setImage = setBitmap;
 
 run(every([
-    evaluate({everyBitmap: true}),
     some([
         every([
             evaluate({everyImageLoader: true}),
             call('skin'),
         ]),
         call('skinDispose'),
-        call('skinUpdate')
+        every([
+            evaluate({everyBitmap: true}),
+            call('skinUpdate')
+        ])
     ]),
     buildChromeless,
-    buildPlan(106)
+    buildPlan(82)
 ]), {
     reports: [],
     resolver: resolver({
         ...declareRenderWebGL,
         ...declareSkin,
-        createImage,
+        ...declareAssets,
         setImage,
         newSkin,
     }),

@@ -1,7 +1,7 @@
 const {optional, state, evaluate, not, resolver, some, every, call, run, build, loadModule, buildPlan, afterEach, value} = require('../fixtures/declare-tests');
 const {buildChromeless} = require('../fixtures/declare-chromeless');
 
-const {loadSVG} = require('../fixtures/declare-assets');
+const declareAssets = require('../fixtures/declare-assets');
 const declareRenderWebGL = require('../fixtures/declare-RenderWebGL');
 const declareSkin = require('../fixtures/declare-Skin');
 
@@ -20,17 +20,15 @@ const newSVGSkin = every([
 
 const newSkin = newSVGSkin;
 
-const createImage = createSVG;
-
 const setSVG = every([
-    optional(state('imageRotationCenter'),
-        evaluate({
-            oldImageRotationCenter: true,
-            test: [function setOldImageRotationCenter (context) {
-                context.oldImageRotationCenter = context.imageRotationCenter;
-            }]
-        })
-    ),
+    state('svgImage'),
+    not(state('bitmapImage')),
+    optional(state('imageRotationCenter'), evaluate({
+        oldImageRotationCenter: true,
+        test: [function setOldImageRotationCenter (context) {
+            context.oldImageRotationCenter = context.imageRotationCenter;
+        }]
+    })),
     some([
         evaluate(state => ({
             imageRotationCenter: true,
@@ -54,27 +52,31 @@ const setSVG = every([
 const setImage = setSVG;
 
 const getTexture = every([
+    evaluate({scale: null}),
     declareSkin.getTexture,
     evaluate({scale: [100, 100]}),
     declareSkin.getTexture,
     evaluate({scale: [200, 200]}),
-    declareSkin.getTexture
+    declareSkin.getTexture,
+    evaluate({scale: null})
 ]);
 
 run(every([
-    evaluate({everySVG: true})
     some([
         call('skinDispose'),
-        call('skinUpdate')
+        every([
+            evaluate({everySVG: true}),
+            call('skinUpdate')
+        ])
     ]),
     buildChromeless,
-    buildPlan(81)
+    buildPlan(75)
 ]), {
     reports: [],
     resolver: resolver({
         ...declareRenderWebGL,
         ...declareSkin,
-        createImage,
+        ...declareAssets,
         setImage,
         newSkin,
         getTexture

@@ -1,4 +1,4 @@
-const {pass, some, every, evaluate, optional, state} = require('./declare-tests');
+const {pass, some, every, evaluate, optional, state, not} = require('./declare-tests');
 
 async function loadAsset_fetch (context, name) {
     context.assetResponse = await fetch(`./assets/${name}`);
@@ -147,9 +147,43 @@ const createSVG = some([
     ])
 ]);
 
-const createImage = some([
-    createBitmap,
-    createSVG
+const loadTextBubble = function (textBubble) {
+    return evaluate({
+        textBubble,
+        imageRotationCenter: true,
+        test: [function createTextBubble (context, textBubble) {
+            context.textBubble = textBubble;
+            context.imageRotationCenter = [0, 0];
+        }, textBubble]
+    });
+};
+
+const createTextBubble = some([
+    loadTextBubble({type: 'say', 'text': 'Hello World!', pointsLeft: true}),
+    every([
+        state('everyTextBubble')
+    ])
+]);
+
+const createImage = every([
+    evaluate({
+        svgImage: false,
+        bitmapImage: false,
+        textBubble: false
+    }),
+    some([
+        createBitmap,
+        createSVG,
+        createTextBubble
+    ]),
+    optional(every([state('imageSize'), not(state('imageRotationCenter'))]), evaluate({
+        imageRotationCenter: true,
+        test: [function imageRotationCenter (context) {
+            context.imageRotationCenter = [
+                context.imageSize[0] / 2, context.imageSize[1] / 2
+            ];
+        }]
+    }))
 ]);
 
 module.exports = {
