@@ -383,6 +383,7 @@ class RenderWebGL extends EventEmitter {
 
         const newSkin = new SVGSkin(skinId, this);
         newSkin.setSVG(svgData, rotationCenter);
+        newSkin.addListener(Skin.Events.WasAltered, this._skinWasAltered.bind(this, newSkin));
         this._reskin(skinId, newSkin);
     }
 
@@ -402,6 +403,7 @@ class RenderWebGL extends EventEmitter {
 
         const newSkin = new BitmapSkin(skinId, this);
         newSkin.setBitmap(imgData, bitmapResolution, rotationCenter);
+        newSkin.addListener(Skin.Events.WasAltered, this._skinWasAltered.bind(this, newSkin));
         this._reskin(skinId, newSkin);
     }
 
@@ -435,6 +437,7 @@ class RenderWebGL extends EventEmitter {
 
         const newSkin = new TextBubbleSkin(skinId, this);
         newSkin.setTextBubble(type, text, pointsLeft);
+        newSkin.addListener(Skin.Events.WasAltered, this._skinWasAltered.bind(this, newSkin));
         this._reskin(skinId, newSkin);
     }
 
