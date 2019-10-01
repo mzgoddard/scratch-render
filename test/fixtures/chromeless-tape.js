@@ -174,6 +174,7 @@ module.exports = function (name, func) {
         try {
             await chromeless.evaluate(function (name, coverage) {
                 document.querySelector('.test-title').innerText = name;
+                document.querySelector('.test-preview').innerHTML = '';
                 if (!window.__coverage__) window.__coverage__ = coverage;
             }, name, global.__coverage__);
             const results = await func(t, chromeless);

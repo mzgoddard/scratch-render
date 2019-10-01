@@ -9,19 +9,19 @@ run(every([
     some([
         call('renderer'),
         every([
-            evaluate({
-                everyImageLoader: true
-            }),
+            evaluate({everyImageLoader: true}),
             call('rendererCreateSkin'),
         ]),
-        every([
-            call('rendererUpdateSkin')
-        ]),
+        call('rendererUpdateSkin'),
         call('rendererUpdateDrawableSkin'),
+        call('rendererDrawableTouching'),
+        call('rendererPick'),
+        call('rendererIsTouchingDrawables'),
+        call('rendererIsTouchingColor'),
         call('rendererDraw')
     ]),
     buildChromeless,
-    buildPlan(72)
+    buildPlan(172)
 ]), {
     reports: [],
     resolver: resolver({

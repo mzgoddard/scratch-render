@@ -99,7 +99,7 @@ function texture (context, scale) {
 
 const getTexture = evaluate(state => ({
     plan: 3,
-    name: `getTexture(${JSON.stringify(state.scale)})`,
+    name: `getTexture(${state.scale ? JSON.stringify(state.scale) : ''})`,
     test: [texture, state.scale],
 }));
 

@@ -1,4791 +1,1046 @@
 const chromelessTest = require('../fixtures/chromeless-tape');
 
-function register (fns) {
-   return `function () {
-       ${fns.map(fn => `(${fn.toString()})();
-`).join('')}
-   }`;
+function load (methods) {
+    if (document.querySelector('.methods')) return;
+    const script = document.createElement('script');
+    return new Promise(resolve => {
+        script.onload = function () {
+            script.classList.add('methods');
+            resolve();
+        };
+        script.src = methods;
+        document.body.appendChild(script);
+    });
 }
 
-function register_call () {
-    if (window.call) return;
-    window.call = async function call (fn, context, args) {
-        return [
-            ['comment', `${fn.name}(...${JSON.stringify(args)})`],
-            ...((await fn(context, ...args)) || [])
-        ];
-    };
-}
-function register_loadModuleVarTest () {
-    if (window.loadModuleVarTest) return;
-    window.loadModuleVarTest = function loadModuleVarTest (context, name, srcPath) {
-        context.module = context.module || {};
-        context.module[name] = window.ScratchRenderFiles(srcPath);
-        return [['ok', context.module[name], `module ${name} loaded`]];
-    };
-}
-function register_createCanvas () {
-    if (window.createCanvas) return;
-    window.createCanvas = function createCanvas (context) {
-        context.canvas = document.createElement('canvas');
-    };
-}
-function register_newRenderWebGL () {
-    if (window.newRenderWebGL) return;
-    window.newRenderWebGL = function newRenderWebGL (context) {
-        context.renderer = new context.module.RenderWebGL(context.canvas);
-    };
-}
-function register_valueTest () {
-    if (window.valueTest) return;
-    window.valueTest = function valueTest (context, key) {
-        context.value = context[key];
-        return [['ok', typeof context.value !== 'undefined', 'context.value is set']];
-    };
-}
-function register_hasPropertyTest () {
-    if (window.hasPropertyTest) return;
-    window.hasPropertyTest = function hasPropertyTest (context, key) {
-        // Test that this does not throw.
-        context.value[key];
-        return [['ok', key in context.value, `has ${key} property`]];
-    };
-}
-function register_loadAsset_fetch () {
-    if (window.loadAsset_fetch) return;
-    window.loadAsset_fetch = async function loadAsset_fetch (context, name) {
-        context.assetResponse = await fetch(`./assets/${name}`);
-        return [
-            ['comment', `fetch('./assets/${name}')`],
-            ['equal', typeof context.assetResponse, 'object', 'sent asset request']
-        ];
-    };
-}
-function register_storeImageSize () {
-    if (window.storeImageSize) return;
-    window.storeImageSize = function storeImageSize (context, size) {
-        context.imageSize = size;
-    };
-}
-function register_loadPNG_arrayBuffer () {
-    if (window.loadPNG_arrayBuffer) return;
-    window.loadPNG_arrayBuffer = async function loadPNG_arrayBuffer (context) {
-        context.imageSourceBuffer = await context.assetResponse.arrayBuffer();
-        context.imageSourceBlob = new Blob([context.imageSourceBuffer], {type: 'image/png'});
-        return [
-            ['equal', typeof context.imageSourceBuffer, 'object', 'loaded png buffer']
-        ];
-    };
-}
-function register_loadPNG_image () {
-    if (window.loadPNG_image) return;
-    window.loadPNG_image = async function loadPNG_image (context) {
-        context.imageSource = await new Promise((resolve, reject) => {
-            const url = URL.createObjectURL(context.imageSourceBlob);
-            const image = new Image();
-            image.onload = () => resolve(image);
-            image.onerror = reject;
-            image.src = url;
-        });
-        return [
-            ['ok', context.imageSource instanceof Image, 'loaded png image']
-        ];
-    };
-}
-function register_imageRotationCenter () {
-    if (window.imageRotationCenter) return;
-    window.imageRotationCenter = function imageRotationCenter (context) {
-        context.imageRotationCenter = [
-            context.imageSize[0] / 2, context.imageSize[1] / 2
-        ];
-    };
-}
-function register_createBitmapSkin () {
-    if (window.createBitmapSkin) return;
-    window.createBitmapSkin = function createBitmapSkin (context) {
-        context.skinId = context.renderer.createBitmapSkin(context.imageSource);
-    };
-}
-function register_setSkinContext () {
-    if (window.setSkinContext) return;
-    window.setSkinContext = function setSkinContext (context) {
-        context.skin = context.renderer._allSkins[context.skinId];
-    };
-}
-function register_rotationCenterIsArray () {
-    if (window.rotationCenterIsArray) return;
-    window.rotationCenterIsArray = function rotationCenterIsArray (context) {
-        return [['ok', context.value.rotationCenter.length >= 2, 'rotationCenter is an array']];
-    };
-}
-function register_skinRotationCenter () {
-    if (window.skinRotationCenter) return;
-    window.skinRotationCenter = function skinRotationCenter (context) {
-        const {rotationCenter} = context.skin;
-        return [['same',
-                [Math.ceil(rotationCenter[0]), Math.ceil(rotationCenter[1])],
-                context.imageRotationCenter,
-                'skin.rotationCenter matches'
-        ]];
-    };
-}
-function register_loadPNG_canvas () {
-    if (window.loadPNG_canvas) return;
-    window.loadPNG_canvas = async function loadPNG_canvas (context) {
-        const imageCanvas = document.createElement('canvas');
-        const imageContext = imageCanvas.getContext('2d');
-        imageCanvas.width = context.imageSource.width;
-        imageCanvas.height = context.imageSource.height;
-        imageContext.drawImage(context.imageSource, 0, 0, imageCanvas.width, imageCanvas.height);
-        context.imageSource = imageCanvas;
-        return [
-            ['ok', context.imageSource instanceof HTMLCanvasElement, 'rendered image into canvas']
-        ];
-    };
-}
-function register_loadPNG_imageBitmap () {
-    if (window.loadPNG_imageBitmap) return;
-    window.loadPNG_imageBitmap = async function loadPNG_imageBitmap (context) {
-        context.imageSource = await createImageBitmap(context.imageSourceBlob);
-        return [
-            ['equal', typeof context.imageSource, 'object', 'loaded png imageBitmap']
-        ];
-    };
-}
-function register_loadSVG_text () {
-    if (window.loadSVG_text) return;
-    window.loadSVG_text = async function loadSVG_text (context) {
-        context.imageSource = await context.assetResponse.text();
-        return [
-            ['equal', typeof context.imageSource, 'string', 'loaded svg string']
-        ];
-    };
-}
-function register_createSVGSkin () {
-    if (window.createSVGSkin) return;
-    window.createSVGSkin = function createSVGSkin (context) {
-        context.skinId = context.renderer.createSVGSkin(context.imageSource);
-    };
-}
-function register_willEmitEventTest () {
-    if (window.willEmitEventTest) return;
-    window.willEmitEventTest = function willEmitEventTest (context, event) {
-        context.event = context.event || {};
-        context.event[event] = {
-            called: false,
-            calledPromise: null,
-            call: []
-        };
-        context.event[event].calledPromise = new Promise(function (resolve) {
-            context.value.on(event, function (...args) {
-                context.event[event].called = true;
-                context.event[event].call.push(args);
-                resolve(context.event[event]);
-            });
-        });
-    };
-}
-function register_didEmitEventTest () {
-    if (window.didEmitEventTest) return;
-    window.didEmitEventTest = async function didEmitEventTest (context, event) {
-        return [
-            await Promise.race([
-                context.event[event].calledPromise
-                .then(({called}) => (['ok', called, `did emit ${event}`])),
-                new Promise((resolve) => setTimeout(resolve, 100))
-                .then(() => (['fail', 'timeout']))
-            ])
-        ];
-    };
-}
-function register_createTextBubble () {
-    if (window.createTextBubble) return;
-    window.createTextBubble = function createTextBubble (context, textBubble) {
-        context.textBubble = textBubble;
-        context.imageRotationCenter = [0, 0];
-    };
-}
-function register_createTextBubbleSkin () {
-    if (window.createTextBubbleSkin) return;
-    window.createTextBubbleSkin = function createTextBubbleSkin (context) {
-        const {type, text, pointsLeft} = context.textBubble;
-        context.skinId = context.renderer.createTextSkin(type, text, pointsLeft);
-    };
-}
-function register_createPenSkin () {
-    if (window.createPenSkin) return;
-    window.createPenSkin = function createPenSkin (context) {
-        context.skinId = context.renderer.createPenSkin();
-    };
-}
-function register_updateBitmapSkin () {
-    if (window.updateBitmapSkin) return;
-    window.updateBitmapSkin = function updateBitmapSkin (context) {
-        context.renderer.updateBitmapSkin(context.skinId, context.imageSource);
-    };
-}
-function register_updateSVGSkin () {
-    if (window.updateSVGSkin) return;
-    window.updateSVGSkin = function updateSVGSkin (context) {
-        context.renderer.updateSVGSkin(context.skinId, context.imageSource);
-    };
-}
-function register_updateTextBubbleSkin () {
-    if (window.updateTextBubbleSkin) return;
-    window.updateTextBubbleSkin = function updateTextBubbleSkin (context) {
-        const {type, text, pointsLeft} = context.textBubble;
-        context.renderer.updateTextSkin(context.skinId, type, text, pointsLeft);
-    };
-}
-function register_rendererSetLayerGroupOrdering () {
-    if (window.rendererSetLayerGroupOrdering) return;
-    window.rendererSetLayerGroupOrdering = function rendererSetLayerGroupOrdering (context) {
-        context.renderer.setLayerGroupOrdering(['stage', 'sprite']);
-    };
-}
-function register_createDrawable () {
-    if (window.createDrawable) return;
-    window.createDrawable = function createDrawable (context) {
-        context.drawableId = context.renderer.createDrawable('sprite');
-        context.drawable = context.renderer._allDrawables[context.drawableId];
-        return [
-            ['ok', context.drawableId >= 0, 'drawableId'],
-            ['ok', Boolean(context.drawable), 'drawable'],
-            ['ok', context.renderer._allDrawables.length > 0, '_allDrawables.length > 0']
-        ];
-    };
-}
-function register_assignDrawableSkin () {
-    if (window.assignDrawableSkin) return;
-    window.assignDrawableSkin = function assignDrawableSkin (context) {
-        context.drawable.skin = context.skin;
-        context.stampDrawableId = context.drawableId;
-        context.stampDrawable = context.drawable;
-        context.stampSkinId = context.skinId;
-        context.stampSkin = context.skin;
-    };
-}
-function register_drawableHasDirtyTransform () {
-    if (window.drawableHasDirtyTransform) return;
-    window.drawableHasDirtyTransform = function drawableHasDirtyTransform (context) {
-        return [
-            ['ok', context.drawable.skin === context.skin, 'drawable skin updated'],
-            ['ok', context.drawable._transformDirty, 'transform is dirty after skin change']
-        ];
-    };
-}
-function register_draw () {
-    if (window.draw) return;
-    window.draw = function draw (context) {
-        context.renderer.draw();
-    };
-}
 chromelessTest('1: RenderWebGL tests: 6 asserts: 4', async function (t, chromeless) {
     t.plan(4);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_1();});
 });
+
 chromelessTest('2: new Image, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_2();});
 });
+
 chromelessTest('3: new Image, HTMLCanvasElement, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(21);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_image, register_loadPNG_canvas, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_image, context, [])),
-                ...(await call(loadPNG_canvas, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_3();});
 });
+
 chromelessTest('4: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_4();});
 });
+
 chromelessTest('5: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(21);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_5();});
 });
+
 chromelessTest('6: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_6();});
 });
+
 chromelessTest('7: RenderWebGL tests: 22 asserts: 17', async function (t, chromeless) {
     t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_7();});
 });
+
 chromelessTest('8: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(23);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_8();});
 });
+
 chromelessTest('9: createImageBitmap, createBitmapSkin(orange50x50.png), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(24);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_9();});
 });
+
 chromelessTest('10: createImageBitmap, createBitmapSkin(orange50x50.png), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_10();});
 });
+
 chromelessTest('11: createSVGSkin(orange50x50.svg), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(24);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_11();});
 });
+
 chromelessTest('12: createSVGSkin(orange50x50.svg), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(25);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_updateSVGSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_12();});
 });
+
 chromelessTest('13: createSVGSkin(orange50x50.svg), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(21);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_13();});
 });
+
 chromelessTest('14: createTextBubbleSkin(say, Hello World!, true), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_14();});
 });
+
 chromelessTest('15: createTextBubbleSkin(say, Hello World!, true), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(21);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"]))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_15();});
 });
+
 chromelessTest('16: createTextBubbleSkin(say, Hello World!, true), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(17);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_16();});
 });
+
 chromelessTest('17: RenderWebGL tests: 27 asserts: 20', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_17();});
 });
+
 chromelessTest('18: RenderWebGL tests: 27 asserts: 20', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_18();});
 });
+
 chromelessTest('19: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(26);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_19();});
 });
+
 chromelessTest('20: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(27);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_20();});
 });
+
 chromelessTest('21: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(23);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_21();});
 });
+
 chromelessTest('22: RenderWebGL tests: 27 asserts: 20', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_22();});
 });
+
 chromelessTest('23: RenderWebGL tests: 27 asserts: 20', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_23();});
 });
+
 chromelessTest('24: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(26);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_24();});
 });
+
 chromelessTest('25: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(27);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_25();});
 });
+
 chromelessTest('26: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(23);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_26();});
 });
+
 chromelessTest('27: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(26);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_27();});
 });
+
 chromelessTest('28: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(26);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_28();});
 });
+
 chromelessTest('29: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(32);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_29();});
 });
+
 chromelessTest('30: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin, register_assignDrawableSkin, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_30();});
 });
+
 chromelessTest('31: createImageBitmap, createBitmapSkin(orange50x50.png), createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(29);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin, register_assignDrawableSkin, register_createTextBubble, register_createTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_31();});
 });
+
 chromelessTest('32: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(27);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_32();});
 });
+
 chromelessTest('33: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(27);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_33();});
 });
+
 chromelessTest('34: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_assignDrawableSkin, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_34();});
 });
+
 chromelessTest('35: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(34);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_35();});
 });
+
 chromelessTest('36: createSVGSkin(orange50x50.svg), createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(30);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_assignDrawableSkin, register_createTextBubble, register_createTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_36();});
 });
+
 chromelessTest('37: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(23);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penPoint(context.penSkinId, penAttributes, 50, 50);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_37();});
 });
+
 chromelessTest('38: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(23);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(function (context) {
-                    const penAttributes = {
-                        diameter: 5,
-                        color4f: [1, 0, 0, 1]
-                    };
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penLine(context.penSkinId, penAttributes, -100, -100, 100, 100);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_38();});
 });
+
 chromelessTest('39: createTextBubbleSkin(say, Hello World!, true), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(29);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_assignDrawableSkin, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_createBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_39();});
 });
+
 chromelessTest('40: createTextBubbleSkin(say, Hello World!, true), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(30);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_assignDrawableSkin, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_createSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_40();});
 });
+
 chromelessTest('41: createTextBubbleSkin(say, Hello World!, true), createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(26);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_assignDrawableSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.skin = context.skin;
-                    context.penDrawableId = context.drawableId;
-                    context.penDrawable = context.drawable;
-                    context.penSkinId = context.skinId;
-                    context.penSkin = context.penSkin;
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(assignDrawableSkin, context, [])),
-                ...(await call(function (context) {
-                    context.drawableId = context.penDrawableId;
-                    context.drawable = context.penDrawable;
-                    
-                    context.renderer.penClear(context.penSkinId);
-                    context.renderer.penStamp(context.penSkinId, context.stampDrawableId);
-                }, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_41();});
 });
+
 chromelessTest('42: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, updateBitmapSkin(orange50x50.png), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(35);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateBitmapSkin, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_42();});
 });
+
 chromelessTest('43: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, updateBitmapSkin(orange50x50.png), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(36);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateBitmapSkin, register_drawableHasDirtyTransform, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_43();});
 });
+
 chromelessTest('44: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, updateBitmapSkin(orange50x50.png), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(32);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateBitmapSkin, register_drawableHasDirtyTransform, register_createTextBubble, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_44();});
 });
+
 chromelessTest('45: createImageBitmap, createBitmapSkin(orange50x50.png), updateSVGSkin(orange50x50.svg), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(36);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_drawableHasDirtyTransform, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_45();});
 });
+
 chromelessTest('46: createImageBitmap, createBitmapSkin(orange50x50.png), updateSVGSkin(orange50x50.svg), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(37);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_46();});
 });
+
 chromelessTest('47: createImageBitmap, createBitmapSkin(orange50x50.png), updateSVGSkin(orange50x50.svg), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_drawableHasDirtyTransform, register_createTextBubble, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_47();});
 });
+
 chromelessTest('48: createImageBitmap, createBitmapSkin(orange50x50.png), updateTextBubbleSkin(say, Hello World!, true), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(32);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin, register_drawableHasDirtyTransform, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_48();});
 });
+
 chromelessTest('49: createImageBitmap, createBitmapSkin(orange50x50.png), updateTextBubbleSkin(say, Hello World!, true), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin, register_drawableHasDirtyTransform, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_49();});
 });
+
 chromelessTest('50: createImageBitmap, createBitmapSkin(orange50x50.png), updateTextBubbleSkin(say, Hello World!, true), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(29);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_50();});
 });
+
 chromelessTest('51: createSVGSkin(orange50x50.svg), createImageBitmap, updateBitmapSkin(orange50x50.png), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(36);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_51();});
 });
+
 chromelessTest('52: createSVGSkin(orange50x50.svg), createImageBitmap, updateBitmapSkin(orange50x50.png), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(37);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin, register_drawableHasDirtyTransform, register_updateSVGSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_52();});
 });
+
 chromelessTest('53: createSVGSkin(orange50x50.svg), createImageBitmap, updateBitmapSkin(orange50x50.png), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin, register_drawableHasDirtyTransform, register_createTextBubble, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_53();});
 });
+
 chromelessTest('54: createSVGSkin(orange50x50.svg), updateSVGSkin(orange50x50.svg), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(37);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_updateSVGSkin, register_drawableHasDirtyTransform, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_54();});
 });
+
 chromelessTest('55: createSVGSkin(orange50x50.svg), updateSVGSkin(orange50x50.svg), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(38);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_updateSVGSkin, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_55();});
 });
+
 chromelessTest('56: createSVGSkin(orange50x50.svg), updateSVGSkin(orange50x50.svg), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(34);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_updateSVGSkin, register_drawableHasDirtyTransform, register_createTextBubble, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_56();});
 });
+
 chromelessTest('57: createSVGSkin(orange50x50.svg), updateTextBubbleSkin(say, Hello World!, true), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin, register_drawableHasDirtyTransform, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_57();});
 });
+
 chromelessTest('58: createSVGSkin(orange50x50.svg), updateTextBubbleSkin(say, Hello World!, true), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(34);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin, register_drawableHasDirtyTransform, register_updateSVGSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_58();});
 });
+
 chromelessTest('59: createSVGSkin(orange50x50.svg), updateTextBubbleSkin(say, Hello World!, true), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(30);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_createTextBubble, register_updateTextBubbleSkin, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_59();});
 });
+
 chromelessTest('60: createTextBubbleSkin(say, Hello World!, true), createImageBitmap, updateBitmapSkin(orange50x50.png), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(32);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_60();});
 });
+
 chromelessTest('61: createTextBubbleSkin(say, Hello World!, true), createImageBitmap, updateBitmapSkin(orange50x50.png), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin, register_drawableHasDirtyTransform, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_61();});
 });
+
 chromelessTest('62: createTextBubbleSkin(say, Hello World!, true), createImageBitmap, updateBitmapSkin(orange50x50.png), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(29);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin, register_drawableHasDirtyTransform, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_62();});
 });
+
 chromelessTest('63: createTextBubbleSkin(say, Hello World!, true), updateSVGSkin(orange50x50.svg), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(33);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_drawableHasDirtyTransform, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_63();});
 });
+
 chromelessTest('64: createTextBubbleSkin(say, Hello World!, true), updateSVGSkin(orange50x50.svg), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(34);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_64();});
 });
+
 chromelessTest('65: createTextBubbleSkin(say, Hello World!, true), updateSVGSkin(orange50x50.svg), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(30);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest, register_drawableHasDirtyTransform, register_updateTextBubbleSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_65();});
 });
+
 chromelessTest('66: createTextBubbleSkin(say, Hello World!, true), updateTextBubbleSkin(say, Hello World!, true), createImageBitmap, updateBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(29);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateTextBubbleSkin, register_drawableHasDirtyTransform, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_updateBitmapSkin]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(updateBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_66();});
 });
+
 chromelessTest('67: createTextBubbleSkin(say, Hello World!, true), updateTextBubbleSkin(say, Hello World!, true), updateSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(30);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateTextBubbleSkin, register_drawableHasDirtyTransform, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_updateSVGSkin, register_willEmitEventTest, register_didEmitEventTest]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(updateSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_67();});
 });
+
 chromelessTest('68: createTextBubbleSkin(say, Hello World!, true), updateTextBubbleSkin(say, Hello World!, true), updateTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(26);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_updateTextBubbleSkin, register_drawableHasDirtyTransform]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, [])),
-                ...(await call(function (context) {
-                    context.drawable.getAABB();
-                    return [['equal', context.drawable._transformDirty, false, 'transform is not dirty']];
-                }, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(updateTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(drawableHasDirtyTransform, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_68();});
 });
-chromelessTest('69: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+
+chromelessTest('69: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_69();});
+});
+
+chromelessTest('70: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_70();});
+});
+
+chromelessTest('71: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_71();});
+});
+
+chromelessTest('72: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_72();});
+});
+
+chromelessTest('73: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_73();});
+});
+
+chromelessTest('74: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_74();});
+});
+
+chromelessTest('75: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_75();});
+});
+
+chromelessTest('76: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_76();});
+});
+
+chromelessTest('77: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_77();});
+});
+
+chromelessTest('78: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_78();});
+});
+
+chromelessTest('79: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_79();});
+});
+
+chromelessTest('80: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_80();});
+});
+
+chromelessTest('81: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_81();});
+});
+
+chromelessTest('82: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_82();});
+});
+
+chromelessTest('83: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_83();});
+});
+
+chromelessTest('84: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_84();});
+});
+
+chromelessTest('85: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_85();});
+});
+
+chromelessTest('86: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_86();});
+});
+
+chromelessTest('87: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_87();});
+});
+
+chromelessTest('88: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_88();});
+});
+
+chromelessTest('89: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_89();});
+});
+
+chromelessTest('90: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_90();});
+});
+
+chromelessTest('91: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_91();});
+});
+
+chromelessTest('92: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_92();});
+});
+
+chromelessTest('93: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_93();});
+});
+
+chromelessTest('94: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_94();});
+});
+
+chromelessTest('95: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_95();});
+});
+
+chromelessTest('96: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_96();});
+});
+
+chromelessTest('97: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_97();});
+});
+
+chromelessTest('98: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_98();});
+});
+
+chromelessTest('99: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_99();});
+});
+
+chromelessTest('100: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_100();});
+});
+
+chromelessTest('101: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_101();});
+});
+
+chromelessTest('102: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_102();});
+});
+
+chromelessTest('103: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_103();});
+});
+
+chromelessTest('104: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_104();});
+});
+
+chromelessTest('105: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_105();});
+});
+
+chromelessTest('106: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(18);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_106();});
+});
+
+chromelessTest('107: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_107();});
+});
+
+chromelessTest('108: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_108();});
+});
+
+chromelessTest('109: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_109();});
+});
+
+chromelessTest('110: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_110();});
+});
+
+chromelessTest('111: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_111();});
+});
+
+chromelessTest('112: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_112();});
+});
+
+chromelessTest('113: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_113();});
+});
+
+chromelessTest('114: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_114();});
+});
+
+chromelessTest('115: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_115();});
+});
+
+chromelessTest('116: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_116();});
+});
+
+chromelessTest('117: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_117();});
+});
+
+chromelessTest('118: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_118();});
+});
+
+chromelessTest('119: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_119();});
+});
+
+chromelessTest('120: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_120();});
+});
+
+chromelessTest('121: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_121();});
+});
+
+chromelessTest('122: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_122();});
+});
+
+chromelessTest('123: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_123();});
+});
+
+chromelessTest('124: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_124();});
+});
+
+chromelessTest('125: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_125();});
+});
+
+chromelessTest('126: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_126();});
+});
+
+chromelessTest('127: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_127();});
+});
+
+chromelessTest('128: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_128();});
+});
+
+chromelessTest('129: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_129();});
+});
+
+chromelessTest('130: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_130();});
+});
+
+chromelessTest('131: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_131();});
+});
+
+chromelessTest('132: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_132();});
+});
+
+chromelessTest('133: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_133();});
+});
+
+chromelessTest('134: createImageBitmap, createBitmapSkin(orange50x50.png), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(19);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_134();});
+});
+
+chromelessTest('135: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_135();});
+});
+
+chromelessTest('136: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_136();});
+});
+
+chromelessTest('137: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_137();});
+});
+
+chromelessTest('138: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_138();});
+});
+
+chromelessTest('139: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_139();});
+});
+
+chromelessTest('140: createImageBitmap, createBitmapSkin(orange50x50.png), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_140();});
+});
+
+chromelessTest('141: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_141();});
+});
+
+chromelessTest('142: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_142();});
+});
+
+chromelessTest('143: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_143();});
+});
+
+chromelessTest('144: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_144();});
+});
+
+chromelessTest('145: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_145();});
+});
+
+chromelessTest('146: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_146();});
+});
+
+chromelessTest('147: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_147();});
+});
+
+chromelessTest('148: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_148();});
+});
+
+chromelessTest('149: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_149();});
+});
+
+chromelessTest('150: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_150();});
+});
+
+chromelessTest('151: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_151();});
+});
+
+chromelessTest('152: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_152();});
+});
+
+chromelessTest('153: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_153();});
+});
+
+chromelessTest('154: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_154();});
+});
+
+chromelessTest('155: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_155();});
+});
+
+chromelessTest('156: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_156();});
+});
+
+chromelessTest('157: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_157();});
+});
+
+chromelessTest('158: createSVGSkin(orange50x50.svg), createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_158();});
+});
+
+chromelessTest('159: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_159();});
+});
+
+chromelessTest('160: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_160();});
+});
+
+chromelessTest('161: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_161();});
+});
+
+chromelessTest('162: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_162();});
+});
+
+chromelessTest('163: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_163();});
+});
+
+chromelessTest('164: createSVGSkin(orange50x50.svg), createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(21);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_164();});
+});
+
+chromelessTest('165: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
     t.plan(23);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadPNG_arrayBuffer, register_loadPNG_imageBitmap, register_imageRotationCenter, register_createBitmapSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_draw]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadPNG_arrayBuffer, context, [])),
-                ...(await call(loadPNG_imageBitmap, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createBitmapSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(draw, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_165();});
 });
-chromelessTest('70: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+
+chromelessTest('166: createImageBitmap, createBitmapSkin(orange50x50.png)', async function (t, chromeless) {
+    t.plan(23);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_166();});
+});
+
+chromelessTest('167: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
     t.plan(24);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_loadAsset_fetch, register_storeImageSize, register_loadSVG_text, register_imageRotationCenter, register_createSVGSkin, register_setSkinContext, register_willEmitEventTest, register_didEmitEventTest, register_rotationCenterIsArray, register_skinRotationCenter, register_draw]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(loadAsset_fetch, context, ["orange50x50.svg"])),
-                ...(await call(storeImageSize, context, [[50,50]])),
-                ...(await call(loadSVG_text, context, [])),
-                ...(await call(imageRotationCenter, context, [])),
-                ...(await call(createSVGSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(willEmitEventTest, context, ["WasAltered"])),
-                ...(await call(didEmitEventTest, context, ["WasAltered"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(draw, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_167();});
 });
-chromelessTest('71: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
-    t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createTextBubble, register_createTextBubbleSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_draw]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true}])),
-                ...(await call(createTextBubbleSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(draw, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+
+chromelessTest('168: createSVGSkin(orange50x50.svg)', async function (t, chromeless) {
+    t.plan(24);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_168();});
 });
-chromelessTest('72: RenderWebGL tests: 26 asserts: 20', async function (t, chromeless) {
+
+chromelessTest('169: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
     t.plan(20);
-    
-    await chromeless.evaluate(register([register_call, register_loadModuleVarTest, register_createCanvas, register_newRenderWebGL, register_valueTest, register_hasPropertyTest, register_rendererSetLayerGroupOrdering, register_createDrawable, register_createPenSkin, register_setSkinContext, register_rotationCenterIsArray, register_skinRotationCenter, register_draw]));
-    
-    return await chromeless.evaluate(async function (coverage) {
-        try {
-            const context = {};
-            return [
-                ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-                ...(await call(createCanvas, context, [])),
-                ...(await call(newRenderWebGL, context, [])),
-                ...(await call(valueTest, context, ["renderer"])),
-                ...(await call(hasPropertyTest, context, ["gl"])),
-                ...(await call(hasPropertyTest, context, ["canvas"])),
-                ...(await call(rendererSetLayerGroupOrdering, context, [])),
-                ...(await call(createDrawable, context, [])),
-                ...(await call(function (context) {
-                    context.imageSize = [480, 360];
-                    context.imageRotationCenter = [240, 180];
-                }, context, [])),
-                ...(await call(createPenSkin, context, [])),
-                ...(await call(setSkinContext, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["on"])),
-                ...(await call(hasPropertyTest, context, ["off"])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["id"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(hasPropertyTest, context, ["isRaster"])),
-                ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-                ...(await call(rotationCenterIsArray, context, [])),
-                ...(await call(valueTest, context, ["skin"])),
-                ...(await call(hasPropertyTest, context, ["size"])),
-                ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-                ...(await call(skinRotationCenter, context, [])),
-                ...(await call(function assignDrawableSkin (context) {
-                    context.drawable.skin = context.skin;
-                }, context, [])),
-                ...(await call(draw, context, []))
-            ];
-        } catch (e) {
-            return [['fail', e.stack || e.message]];
-        }
-    });
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_169();});
+});
+
+chromelessTest('170: createTextBubbleSkin(say, Hello World!, true)', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_170();});
+});
+
+chromelessTest('171: RenderWebGL tests: 26 asserts: 20', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_171();});
+});
+
+chromelessTest('172: RenderWebGL tests: 27 asserts: 20', async function (t, chromeless) {
+    t.plan(20);
+    await chromeless.evaluate(load, '/test/unit/RenderWebGL.methods.js');
+    return await chromeless.evaluate(function () {return test_172();});
 });

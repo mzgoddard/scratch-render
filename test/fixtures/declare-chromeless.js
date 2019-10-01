@@ -43,19 +43,36 @@ async function evaluate (t, chromeless, fn, ...args) {
 const fnMap = new WeakMap();
 
 const writtenFilename = /^(.*)\.js$/.exec(process.mainModule.filename)[1] + '.test.js';
+const registerFilename = /^(.*)\.js$/.exec(process.mainModule.filename)[1] + '.methods.js';
+const registerUrl = '/' + require('path').relative(require('path').join(__dirname, '../..'), registerFilename);
 const fs = require('fs');
 try {
     fs.unlinkSync(writtenFilename);
+    fs.unlinkSync(registerFilename);
 } catch (e) {}
 fs.appendFileSync(writtenFilename, [
     `const chromelessTest = require('../fixtures/chromeless-tape');`,
     '',
-    'function register (fns) {',
-    '   return `function () {',
-    '       ${fns.map(fn => `(${fn.toString()})();\n`).join(\'\')}',
-    '   }`;',
+    // 'function register (fns) {',
+    // '   return `function () {',
+    // '       ${fns.map(fn => `(${fn.toString()})();\n`).join(\'\')}',
+    // '   }`;',
+    // '}',
+    // '',
+    'function load (methods) {',
+    '    if (document.querySelector(\'.methods\')) return;',
+    '    const script = document.createElement(\'script\');',
+    '    return new Promise(resolve => {',
+    '        script.onload = function () {',
+    '            script.classList.add(\'methods\');',
+    '            resolve();',
+    '        };',
+    '        script.src = methods;',
+    '        document.body.appendChild(script);',
+    '    });',
     '}',
-].join('\n') + '\n');
+    ''
+].join('\n'));
 
 let nextId = 1;
 
@@ -71,7 +88,7 @@ function register (fns) {
 async function call (fn, context, args) {
     return [
         ['comment', `${fn.name}(...${JSON.stringify(args)})`],
-        ...((await fn(context, ...args)) || [])
+        ...((await fn(context, ...args)) || []).map(test => test[test.length - 1].stack ? test : [...test, {stack: new Error(test[test.length - 1]).stack.split('\n').slice(4).join('\n')}])
     ];
 }
 
@@ -114,8 +131,10 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
     // const uniqueNamedTests = [...fileUniqueNamedTests, ...testUniqueNamedTests];
     // console.log(`${uniqueNamedTests.map(([fn]) => [fn.name, fn.toString()]).join('\n')}`);
     // ${testUniqueNamedTests.map(fn => fn.toString().replace(/^(async )?function\s?\(/, `\$1function ${fn.name} (`)).join('\n')}
+
+    const index = nextId++;
     const fullTest = new Function(`
-        return async function (coverage) {
+        return async function test_${index} (coverage) {
             try {
                 const context = {};
                 return [
@@ -138,26 +157,25 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
         await evaluate(t, chromeless, fullTest, fullArgs);
     };
 
-    fs.appendFileSync(writtenFilename, uniqueNamedTests.map(fn => indent(`\nfunction register_${fn.name} () {\nif (window.${fn.name}) return;\nwindow.${fn.name} = ${fn.toString()};\n}`)).join(''));
+    // fs.appendFileSync(writtenFilename, uniqueNamedTests.map(fn => indent(`\nfunction register_${fn.name} () {\nif (window.${fn.name}) return;\nwindow.${fn.name} = ${fn.toString()};\n}`)).join(''));
+    fs.appendFileSync(registerFilename, uniqueNamedTests.map(fn => indent(`${fn.toString()}\n`)).join(''));
 
-    const index = nextId++;
     const file = /\/([^/]+)$/.exec(process.mainModule.filename)[1].split('.')[0];
     const debugName = `${file} tests: ${tests.length} asserts: ${plan}`;
     const name = `${index}: ${state.name || debugName}`;
     const body = indent(`async function (t, chromeless) {
         t.plan(${plan});
-        ${usedUniqueTestFns.length ? `
-            await chromeless.evaluate(register([${usedUniqueTestFns.map(fn => `register_${fn.name}`).join(', ')}]));
-        ` : ''}
-        return await chromeless.evaluate(${fullTest.toString()});
+        await chromeless.evaluate(load, '${registerUrl}');
+        return await chromeless.evaluate(function () {return test_${index}();});
     }`);
-    const testBody = `chromelessTest('${name}', ${body});`;
+    const testBody = `chromelessTest('${name}', ${body});\n`;
     if (testsSoFar.includes(body)) {
         throw new Error('Duplicate test produced');
     }
 
     Promise.resolve().then(() => {
         fs.appendFileSync(writtenFilename, '\n' + testBody);
+        fs.appendFileSync(registerFilename, indent(fullTest.toString() + '\n'));
         return;
         eval(
             register.toString() +

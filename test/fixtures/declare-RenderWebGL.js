@@ -3,6 +3,8 @@ const {value, pass, call, state, evaluate, loadModule, every, some, init, not, h
 const canvas = evaluate({
     test: [function createCanvas (context) {
         context.canvas = document.createElement('canvas');
+        context.canvas.width = 480;
+        context.canvas.height = 360;
     }]
 });
 
@@ -96,11 +98,19 @@ const rendererNewPenSkin = every([
     setSkinContext
 ]);
 
-const rendererSetLayerStageSprite = evaluate({
+const rendererSetLayerStageSprite = init(state('setLayerGroupOrdering'), evaluate({
+    setLayerGroupOrdering: true,
     test: [function rendererSetLayerGroupOrdering (context) {
         context.renderer.setLayerGroupOrdering(['stage', 'sprite']);
     }]
-});
+}));
+
+const rendererSetLayerStagePenSprite = init(state('setLayerGroupOrdering'), evaluate({
+    setLayerGroupOrdering: true,
+    test: [function rendererSetLayerGroupOrdering (context) {
+        context.renderer.setLayerGroupOrdering(['stage', 'pen', 'sprite']);
+    }]
+}));
 
 const rendererNewDrawable = evaluate({
     plan: 3,
@@ -231,14 +241,16 @@ const rendererCreateDrawable = every([
     rendererNewDrawable
 ]);
 
+const rendererAssignDrawableSkin = evaluate({
+    test: [function assignDrawableSkin (context) {
+        context.drawable.skin = context.skin;
+    }]
+});
+
 const rendererSetDrawableSkin = every([
     rendererCreateDrawable,
     rendererCreateSkin,
-    evaluate({
-        test: [function assignDrawableSkin (context) {
-            context.drawable.skin = context.skin;
-        }]
-    })
+    rendererAssignDrawableSkin
 ]);
 
 const primeDrawableTransform = evaluate({
@@ -269,14 +281,157 @@ const rendererUpdateDrawableSkin = every([
     drawableHasDirtyTransform
 ]);
 
+const rendererConfigureDrawable = function (config) {
+    return every([
+        evaluate({
+            test: [function (context, config) {
+                context.drawableConfig = config;
+            }, config]
+        }),
+        renderer,
+        rendererSetLayerStageSprite,
+        rendererNewDrawable,
+        rendererNewSkin,
+        config.skin ? some(config.skin.map(check => state(check))) : null,
+        rendererAssignDrawableSkin,
+        evaluate({
+            test: [function (context, properties) {
+                context.drawable.updateProperties(properties);
+            }, config.properties]
+        })
+    ].filter(Boolean));
+};
+
 const rendererScene = some([
-    rendererSetDrawableSkin,
+    rendererSetDrawableSkin
 ]);
+
+const rendererTouchingScene = every([
+    some([
+        every([
+            rendererConfigureDrawable({
+                skin: ['svgImage', 'bitmapImage'],
+                properties: {position: [10, 10]}
+            }),
+            some([
+                pass,
+                evaluate({
+                    test: [function (context) {
+                        context.drawable.updateProperties({scale: [150, 150]});
+                    }]
+                })
+            ]),
+            rendererConfigureDrawable({
+                skin: ['svgImage', 'bitmapImage'],
+                properties: {position: [-10, -10]}
+            }),
+            some([
+                pass,
+                evaluate({
+                    test: [function (context) {
+                        context.drawable.updateProperties({scale: [150, 150]});
+                    }]
+                })
+            ])
+        ])
+    ]),
+    evaluate({
+        test: [function draw (context) {
+            document.querySelector('.test-preview').appendChild(context.canvas);
+            context.renderer.draw();
+        }]
+    })
+]);
+
+const rendererDrawableTouching = every([
+    rendererTouchingScene,
+    evaluate({
+        plan: 2,
+        test: [function (context) {
+            return [
+                ['equal', context.renderer._allDrawables.length, 2, 'there are two drawables'],
+                ['ok', context.renderer.drawableTouching(context.drawableId, 240, 180), 'can touch drawable'],
+            ];
+        }]
+    })
+]);
+
+const rendererPick = every([
+    rendererTouchingScene,
+    evaluate({
+        plan: 2,
+        test: [function (context) {
+            return [
+                ['equal', context.renderer._allDrawables.length, 2, 'there are two drawables'],
+                ['equal', context.renderer.pick(240, 180), context.drawableId, 'can pick drawable'],
+            ];
+        }]
+    })
+]);
+
+const rendererIsTouchingDrawables = every([
+    rendererTouchingScene,
+    evaluate({
+        plan: 2,
+        test: [function (context) {
+            return [
+                ['equal', context.renderer._allDrawables.length, 2, 'there are two drawables'],
+                ['ok', context.renderer.isTouchingDrawables(context.drawableId), 'drawables are touching'],
+            ];
+        }]
+    })
+]);
+
+const rendererIsTouchingColor = every([
+    rendererTouchingScene,
+    some([
+        evaluate({
+            test: [function (context) {
+                context.renderer.setUseGpuMode(context.module.RenderWebGL.UseGpuModes.ForceCPU);
+            }]
+        }),
+        evaluate({
+            test: [function (context) {
+                context.renderer.setUseGpuMode(context.module.RenderWebGL.UseGpuModes.ForceGPU);
+            }]
+        }),
+        evaluate({
+            test: [function (context) {
+                context.renderer.setUseGpuMode(context.module.RenderWebGL.UseGpuModes.Automatic);
+            }]
+        })
+    ]),
+    evaluate({
+        plan: 3,
+        test: [function isTouchingColor (context) {
+            return [
+                ['equal', context.renderer._allDrawables.length, 2, 'there are two drawables'],
+                ['ok',
+                    context.renderer.isTouchingColor(context.drawableId, [255, 171, 26]),
+                    'touching orange'],
+                ['ok',
+                    context.renderer.isTouchingColor(context.drawableId, [0, 0, 0]),
+                    'touching black'],
+            ];
+        }]
+    })
+]);
+
+const rendererSetNativeSize = evaluate({
+    test: [function (context) {
+        context.renderer._setNativeSize(960, 720);
+    }]
+});
 
 const rendererDraw = every([
     rendererScene,
+    some([
+        pass,
+        rendererSetNativeSize
+    ]),
     evaluate({
         test: [function draw (context) {
+            document.querySelector('.test-preview').appendChild(context.canvas);
             context.renderer.draw();
         }]
     })
@@ -295,5 +450,9 @@ module.exports = {
     rendererCreateDrawable,
     rendererSetDrawableSkin,
     rendererUpdateDrawableSkin,
+    rendererDrawableTouching,
+    rendererPick,
+    rendererIsTouchingDrawables,
+    rendererIsTouchingColor,
     rendererDraw
 };

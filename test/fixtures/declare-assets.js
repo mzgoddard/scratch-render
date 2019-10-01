@@ -143,25 +143,37 @@ const createSVG = some([
             loadSVG('purple100x100.svg', [100, 100]),
             loadSVG('gradient50x50.svg', [50, 50]),
             loadSVG('gradient100x100.svg', [100, 100])
-        ]),
+        ])
     ])
 ]);
 
 const loadTextBubble = function (textBubble) {
     return evaluate({
         textBubble,
+        imageSize: true,
         imageRotationCenter: true,
         test: [function createTextBubble (context, textBubble) {
             context.textBubble = textBubble;
+            context.imageSize = textBubble.size;
             context.imageRotationCenter = [0, 0];
         }, textBubble]
     });
 };
 
 const createTextBubble = some([
-    loadTextBubble({type: 'say', 'text': 'Hello World!', pointsLeft: true}),
+    loadTextBubble({type: 'say', 'text': 'Hello World!', pointsLeft: true, size: [100, 52]}),
     every([
-        state('everyTextBubble')
+        state('everyTextBubble'),
+        some([
+            loadTextBubble({type: 'think', 'text': 'Hello World!', pointsLeft: true, size: [100, 52]}),
+            loadTextBubble({type: 'say', 'text': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', pointsLeft: true, size: [192, 132]}),
+            loadTextBubble({type: 'say', 'text': 'Hello World!', pointsLeft: false, size: [100, 52]}),
+            loadTextBubble({type: 'say', 'text': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', pointsLeft: false, size: [192, 132]}),
+            loadTextBubble({type: 'say', 'text': 'Hello\nWorld!', pointsLeft: true, size: [74, 68]}),
+            loadTextBubble({type: 'say', 'text': 'Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n', pointsLeft: true, size: [189, 132]}),
+            loadTextBubble({type: 'say', 'text': '', pointsLeft: true, size: [74, 52]}),
+            loadTextBubble({type: 'say', 'text': 'pneumonoultramicroscopicsilicovolcanoconiosis', pointsLeft: true, size: [192, 68]})
+        ])
     ])
 ]);
 
