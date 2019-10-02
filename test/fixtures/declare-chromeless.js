@@ -88,7 +88,14 @@ function register (fns) {
 async function call (fn, context, args) {
     return [
         ['comment', `${fn.name}(...${JSON.stringify(args)})`],
-        ...((await fn(context, ...args)) || []).map(test => test[test.length - 1].stack ? test : [...test, {stack: new Error(test[test.length - 1]).stack.split('\n').slice(4).join('\n')}])
+        ...((await fn(context, ...args)) || []).map(test => (
+            test[test.length - 1].stack || test[0] === 'comment' ?
+                test :
+                [...test, {
+                    stack: new Error(test[test.length - 1]).stack
+                        .split('\n').slice(4).join('\n')
+                }]
+        ))
     ];
 }
 
