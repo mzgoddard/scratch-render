@@ -134,15 +134,11 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
 
     const index = nextId++;
     const fullTest = new Function(`
-        return async function test_${index} (coverage) {
-            try {
-                const context = {};
-                return [
-                    ${tests.map(([fn, ...args], index) => `...(await call(${fileUniqueNamedTests.some(fn => fn.toString() === _tests[index][0].toString()) ? _tests[index][0].name : _tests[index][0].toString()}, context, ${JSON.stringify(args)}))`).join(',\n')}
-                ];
-            } catch (e) {
-                return [['fail', e.stack || e.message]];
-            }
+        return async function test_${index} () {
+            const context = {};
+            return [
+                ${tests.map(([fn, ...args], index) => `...(await call(${fileUniqueNamedTests.some(fn => fn.toString() === _tests[index][0].toString()) ? _tests[index][0].name : _tests[index][0].toString()}, context, ${JSON.stringify(args)}))`).join(',\n')}
+            ];
         };
     `)();
     const fullArgs = tests.map(([fn, ...args]) => args);
@@ -166,7 +162,13 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
     const body = indent(`async function (t, chromeless) {
         t.plan(${plan});
         await chromeless.evaluate(load, '${registerUrl}');
-        return await chromeless.evaluate(function () {return test_${index}();});
+        return await chromeless.evaluate(function () {
+            try {
+                return test_${index}();
+            } catch (e) {
+                return [['fail', e.message || 'threw error', {stack: e.stack}]];
+            }
+        });
     }`);
     const testBody = `chromelessTest('${name}', ${body});\n`;
     if (testsSoFar.includes(body)) {
@@ -175,7 +177,7 @@ const buildChromeless = function ({plan = 1, tests: _tests, ...state}, each, aft
 
     Promise.resolve().then(() => {
         fs.appendFileSync(writtenFilename, '\n' + testBody);
-        fs.appendFileSync(registerFilename, indent(fullTest.toString() + '\n'));
+        fs.appendFileSync(registerFilename, indent(`// ${name}\n${fullTest.toString()}\n`));
         return;
         eval(
             register.toString() +
