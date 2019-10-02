@@ -1,9 +1,6 @@
-const {state, fail, every, hasProperty, evaluate, call, some, pass} = require('./declare-tests');
+const {state, fail, every, hasProperties, evaluate, call, some, pass} = require('./declare-tests');
 
-const eventsMembers = every([
-    hasProperty('on'),
-    hasProperty('off')
-]);
+const eventsMembers = hasProperties(['on', 'off']);
 
 function willEmitEventTest (context, event) {
     context.event = context.event || {};

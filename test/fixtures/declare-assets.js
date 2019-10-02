@@ -188,7 +188,11 @@ const createImage = every([
         createSVG,
         createTextBubble
     ]),
-    optional(every([state('imageSize'), not(state('imageRotationCenter'))]), evaluate({
+    optional(every([
+        not(state('svgImage')),
+        state('imageSize'),
+        not(state('imageRotationCenter'))
+    ]), evaluate({
         imageRotationCenter: true,
         test: [function imageRotationCenter (context) {
             context.imageRotationCenter = [

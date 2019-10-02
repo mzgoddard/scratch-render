@@ -180,6 +180,7 @@ module.exports = function (name, func) {
             const results = await func(t, chromeless);
             (results || []).map(([fn, ...args]) => {
                 if (t[fn]) t[fn](...args);
+                // else t.fail('no such assert ${fn}');
             });
             global.__coverage__ = await chromeless.evaluate(function () {
                 return window.__coverage__;

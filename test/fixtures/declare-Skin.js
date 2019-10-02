@@ -1,14 +1,9 @@
-const {not, state, fail, every, hasProperty, evaluate, call, some, pass, value, loadModule} = require('./declare-tests');
+const {not, state, fail, every, hasProperty, hasProperties, evaluate, call, some, pass, value, loadModule} = require('./declare-tests');
 const {willEmitEvent, didEmitEvent, eventsMembers} = require('./declare-events');
 
 const concrete = state('concreteSkin');
 const createImage = fail;
 const didEmitWasAltered = didEmitEvent('WasAltered');
-// const didEmitWasAltered = pass;
-// const eventsMembers = every([
-//     hasProperty('on'),
-//     hasProperty('off')
-// ]);
 const newSkin = call('newSkin');
 const setImage = fail;
 const skinId = evaluate({
@@ -18,10 +13,8 @@ const skinId = evaluate({
 });
 const skinInitialMembers = every([
     value('skin'),
-    hasProperty('id'),
-    hasProperty('rotationCenter'),
-    hasProperty('isRaster'),
-    hasProperty('hasPremultipliedAlpha'),
+    hasProperties([
+        'id', 'rotationCenter', 'isRaster', 'hasPremultipliedAlpha']),
     evaluate({
         plan: 1,
         test: [function rotationCenterIsArray (context) {
@@ -30,7 +23,6 @@ const skinInitialMembers = every([
     })
 ]);
 const willEmitWasAltered = willEmitEvent('WasAltered');
-// const willEmitWasAltered = pass;
 
 const postChangeSkin = every([
     value('skin'),
@@ -78,8 +70,7 @@ function skinRotationCenter (context) {
 
 const postAlterSkin = every([
     value('skin'),
-    hasProperty('size'),
-    hasProperty('rotationCenter'),
+    hasProperties(['size', 'rotationCenter']),
     state('imageRotationCenter'),
     evaluate({
         plan: 1,

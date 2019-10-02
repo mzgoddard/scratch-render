@@ -26,7 +26,7 @@ chromelessTest('1: new SVGSkin, dispose', async function (t, chromeless) {
 });
 
 chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
-    t.plan(28);
+    t.plan(27);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -38,7 +38,7 @@ chromelessTest('2: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextur
 });
 
 chromelessTest('3: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), dispose', async function (t, chromeless) {
-    t.plan(28);
+    t.plan(27);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -50,7 +50,7 @@ chromelessTest('3: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(),
 });
 
 chromelessTest('4: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -62,7 +62,7 @@ chromelessTest('4: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextur
 });
 
 chromelessTest('5: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -74,7 +74,7 @@ chromelessTest('5: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(),
 });
 
 chromelessTest('6: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -86,7 +86,7 @@ chromelessTest('6: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getText
 });
 
 chromelessTest('7: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -98,7 +98,7 @@ chromelessTest('7: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(
 });
 
 chromelessTest('8: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -110,7 +110,7 @@ chromelessTest('8: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getText
 });
 
 chromelessTest('9: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -122,7 +122,7 @@ chromelessTest('9: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(
 });
 
 chromelessTest('10: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -134,7 +134,7 @@ chromelessTest('10: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('11: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(35);
+    t.plan(34);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -146,7 +146,7 @@ chromelessTest('11: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('12: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -158,7 +158,7 @@ chromelessTest('12: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('13: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -170,7 +170,7 @@ chromelessTest('13: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('14: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -182,7 +182,7 @@ chromelessTest('14: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('15: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -194,7 +194,7 @@ chromelessTest('15: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('16: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -206,7 +206,7 @@ chromelessTest('16: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('17: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -218,7 +218,7 @@ chromelessTest('17: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -230,7 +230,7 @@ chromelessTest('18: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -242,7 +242,7 @@ chromelessTest('19: new SVGSkin, setSVG(orange50x50.svg), getTexture(), getTextu
 });
 
 chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -254,7 +254,7 @@ chromelessTest('20: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -266,7 +266,7 @@ chromelessTest('21: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -278,7 +278,7 @@ chromelessTest('22: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -290,7 +290,7 @@ chromelessTest('23: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -302,7 +302,7 @@ chromelessTest('24: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('25: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -314,7 +314,7 @@ chromelessTest('25: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('26: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -326,7 +326,7 @@ chromelessTest('26: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('27: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -338,7 +338,7 @@ chromelessTest('27: new SVGSkin, setSVG(orange50x50.svg, [10, 10]), getTexture()
 });
 
 chromelessTest('28: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -350,7 +350,7 @@ chromelessTest('28: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('29: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -362,7 +362,7 @@ chromelessTest('29: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('30: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -374,7 +374,7 @@ chromelessTest('30: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('31: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -386,7 +386,7 @@ chromelessTest('31: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('32: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -398,7 +398,7 @@ chromelessTest('32: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('33: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -410,7 +410,7 @@ chromelessTest('33: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -422,7 +422,7 @@ chromelessTest('34: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -434,7 +434,7 @@ chromelessTest('35: new SVGSkin, setSVG(purple100x100.svg), getTexture(), getTex
 });
 
 chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -446,7 +446,7 @@ chromelessTest('36: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -458,7 +458,7 @@ chromelessTest('37: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -470,7 +470,7 @@ chromelessTest('38: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -482,7 +482,7 @@ chromelessTest('39: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -494,7 +494,7 @@ chromelessTest('40: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('41: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -506,7 +506,7 @@ chromelessTest('41: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('42: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -518,7 +518,7 @@ chromelessTest('42: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('43: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -530,7 +530,7 @@ chromelessTest('43: new SVGSkin, setSVG(purple100x100.svg, [10, 10]), getTexture
 });
 
 chromelessTest('44: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -542,7 +542,7 @@ chromelessTest('44: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('45: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -554,7 +554,7 @@ chromelessTest('45: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('46: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -566,7 +566,7 @@ chromelessTest('46: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('47: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -578,7 +578,7 @@ chromelessTest('47: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('48: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -590,7 +590,7 @@ chromelessTest('48: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('49: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -602,7 +602,7 @@ chromelessTest('49: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -614,7 +614,7 @@ chromelessTest('50: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -626,7 +626,7 @@ chromelessTest('51: new SVGSkin, setSVG(gradient50x50.svg), getTexture(), getTex
 });
 
 chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -638,7 +638,7 @@ chromelessTest('52: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -650,7 +650,7 @@ chromelessTest('53: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -662,7 +662,7 @@ chromelessTest('54: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -674,7 +674,7 @@ chromelessTest('55: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -686,7 +686,7 @@ chromelessTest('56: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('57: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -698,7 +698,7 @@ chromelessTest('57: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('58: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -710,7 +710,7 @@ chromelessTest('58: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('59: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -722,7 +722,7 @@ chromelessTest('59: new SVGSkin, setSVG(gradient50x50.svg, [10, 10]), getTexture
 });
 
 chromelessTest('60: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -734,7 +734,7 @@ chromelessTest('60: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('61: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -746,7 +746,7 @@ chromelessTest('61: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('62: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -758,7 +758,7 @@ chromelessTest('62: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('63: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -770,7 +770,7 @@ chromelessTest('63: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('64: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -782,7 +782,7 @@ chromelessTest('64: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('65: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -794,7 +794,7 @@ chromelessTest('65: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -806,7 +806,7 @@ chromelessTest('66: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -818,7 +818,7 @@ chromelessTest('67: new SVGSkin, setSVG(gradient100x100.svg), getTexture(), getT
 });
 
 chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -830,7 +830,7 @@ chromelessTest('68: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(orange50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -842,7 +842,7 @@ chromelessTest('69: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -854,7 +854,7 @@ chromelessTest('70: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(purple100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -866,7 +866,7 @@ chromelessTest('71: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('72: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -878,7 +878,7 @@ chromelessTest('72: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('73: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient50x50.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -890,7 +890,7 @@ chromelessTest('73: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('74: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {
@@ -902,7 +902,7 @@ chromelessTest('74: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTextu
 });
 
 chromelessTest('75: new SVGSkin, setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200]), setSVG(gradient100x100.svg, [10, 10]), getTexture(), getTexture([100,100]), getTexture([200,200])', async function (t, chromeless) {
-    t.plan(47);
+    t.plan(46);
     await chromeless.evaluate(load, '/test/unit/SVGSkin.methods.js');
     return await chromeless.evaluate(function () {
         try {

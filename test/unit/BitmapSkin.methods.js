@@ -32,6 +32,15 @@ function skinIdTest (context) {
 function newBitmapSkin (context) {
     context.value = context.skin = new context.module.BitmapSkin(context.skinId, context.renderer);
 }
+function hasPropertiesTest (context, keys) {
+    // Test that this does not throw.
+    for (const key of keys) {
+        context.value[key];
+    }
+    return keys.map(key => (
+    ['ok', key in context.value, `has ${key} property`]
+    ));
+}
 function rotationCenterIsArray (context) {
     return [['ok', context.value.rotationCenter.length >= 2, 'rotationCenter is an array']];
 }
@@ -168,13 +177,9 @@ async function test_1 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, []))
     ];
 }
@@ -204,8 +209,7 @@ async function test_2 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -236,8 +240,7 @@ async function test_3 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -269,8 +272,7 @@ async function test_4 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -302,8 +304,7 @@ async function test_5 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -334,8 +335,7 @@ async function test_6 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -366,8 +366,7 @@ async function test_7 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -386,13 +385,9 @@ async function test_8 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
         ...(await call(dispose, context, []))
@@ -424,8 +419,7 @@ async function test_9 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
@@ -458,8 +452,7 @@ async function test_10 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
@@ -480,13 +473,9 @@ async function test_11 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
@@ -501,8 +490,7 @@ async function test_11 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -521,13 +509,9 @@ async function test_12 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
@@ -542,8 +526,7 @@ async function test_12 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -562,13 +545,9 @@ async function test_13 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
@@ -583,8 +562,7 @@ async function test_13 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -603,13 +581,9 @@ async function test_14 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
@@ -624,8 +598,7 @@ async function test_14 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -644,13 +617,9 @@ async function test_15 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
@@ -665,8 +634,7 @@ async function test_15 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -685,13 +653,9 @@ async function test_16 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
@@ -706,8 +670,7 @@ async function test_16 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -726,13 +689,9 @@ async function test_17 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
@@ -747,8 +706,7 @@ async function test_17 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -767,13 +725,9 @@ async function test_18 () {
         ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
         ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(hasPropertiesTest, context, [["on","off"]])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(hasPropertiesTest, context, [["id","rotationCenter","isRaster","hasPremultipliedAlpha"]])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
         ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
@@ -788,8 +742,7 @@ async function test_18 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -820,8 +773,7 @@ async function test_19 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -836,8 +788,7 @@ async function test_19 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -868,8 +819,7 @@ async function test_20 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -884,8 +834,7 @@ async function test_20 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -916,8 +865,7 @@ async function test_21 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -932,8 +880,7 @@ async function test_21 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -964,8 +911,7 @@ async function test_22 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -980,8 +926,7 @@ async function test_22 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1012,8 +957,7 @@ async function test_23 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1028,8 +972,7 @@ async function test_23 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1060,8 +1003,7 @@ async function test_24 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1076,8 +1018,7 @@ async function test_24 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1108,8 +1049,7 @@ async function test_25 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1124,8 +1064,7 @@ async function test_25 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1156,8 +1095,7 @@ async function test_26 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1172,8 +1110,7 @@ async function test_26 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1204,8 +1141,7 @@ async function test_27 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1220,8 +1156,7 @@ async function test_27 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1252,8 +1187,7 @@ async function test_28 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1268,8 +1202,7 @@ async function test_28 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1300,8 +1233,7 @@ async function test_29 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1316,8 +1248,7 @@ async function test_29 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1348,8 +1279,7 @@ async function test_30 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1364,8 +1294,7 @@ async function test_30 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1396,8 +1325,7 @@ async function test_31 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1412,8 +1340,7 @@ async function test_31 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1444,8 +1371,7 @@ async function test_32 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1460,8 +1386,7 @@ async function test_32 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1492,8 +1417,7 @@ async function test_33 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1508,8 +1432,7 @@ async function test_33 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1540,8 +1463,7 @@ async function test_34 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1556,8 +1478,7 @@ async function test_34 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1588,8 +1509,7 @@ async function test_35 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1604,8 +1524,7 @@ async function test_35 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1636,8 +1555,7 @@ async function test_36 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1652,8 +1570,7 @@ async function test_36 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1684,8 +1601,7 @@ async function test_37 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1700,8 +1616,7 @@ async function test_37 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1732,8 +1647,7 @@ async function test_38 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1748,8 +1662,7 @@ async function test_38 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1780,8 +1693,7 @@ async function test_39 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1796,8 +1708,7 @@ async function test_39 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1828,8 +1739,7 @@ async function test_40 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1844,8 +1754,7 @@ async function test_40 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1876,8 +1785,7 @@ async function test_41 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1892,8 +1800,7 @@ async function test_41 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1924,8 +1831,7 @@ async function test_42 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1940,8 +1846,7 @@ async function test_42 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -1972,8 +1877,7 @@ async function test_43 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -1988,8 +1892,7 @@ async function test_43 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2020,8 +1923,7 @@ async function test_44 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2036,8 +1938,7 @@ async function test_44 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2068,8 +1969,7 @@ async function test_45 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2084,8 +1984,7 @@ async function test_45 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2116,8 +2015,7 @@ async function test_46 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2132,8 +2030,7 @@ async function test_46 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2164,8 +2061,7 @@ async function test_47 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2180,8 +2076,7 @@ async function test_47 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2212,8 +2107,7 @@ async function test_48 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2228,8 +2122,7 @@ async function test_48 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2260,8 +2153,7 @@ async function test_49 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2276,8 +2168,7 @@ async function test_49 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2308,8 +2199,7 @@ async function test_50 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2324,8 +2214,7 @@ async function test_50 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2356,8 +2245,7 @@ async function test_51 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2372,8 +2260,7 @@ async function test_51 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2404,8 +2291,7 @@ async function test_52 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2420,8 +2306,7 @@ async function test_52 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2452,8 +2337,7 @@ async function test_53 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2468,8 +2352,7 @@ async function test_53 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2500,8 +2383,7 @@ async function test_54 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2516,8 +2398,7 @@ async function test_54 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2548,8 +2429,7 @@ async function test_55 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2564,8 +2444,7 @@ async function test_55 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2596,8 +2475,7 @@ async function test_56 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2612,8 +2490,7 @@ async function test_56 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2644,8 +2521,7 @@ async function test_57 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2660,8 +2536,7 @@ async function test_57 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2692,8 +2567,7 @@ async function test_58 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2708,8 +2582,7 @@ async function test_58 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2740,8 +2613,7 @@ async function test_59 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2756,8 +2628,7 @@ async function test_59 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2788,8 +2659,7 @@ async function test_60 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2804,8 +2674,7 @@ async function test_60 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2836,8 +2705,7 @@ async function test_61 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2852,8 +2720,7 @@ async function test_61 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2884,8 +2751,7 @@ async function test_62 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2900,8 +2766,7 @@ async function test_62 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2932,8 +2797,7 @@ async function test_63 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2948,8 +2812,7 @@ async function test_63 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -2980,8 +2843,7 @@ async function test_64 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -2996,8 +2858,7 @@ async function test_64 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3028,8 +2889,7 @@ async function test_65 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3044,8 +2904,7 @@ async function test_65 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3076,8 +2935,7 @@ async function test_66 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3092,8 +2950,7 @@ async function test_66 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3124,8 +2981,7 @@ async function test_67 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3140,8 +2996,7 @@ async function test_67 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3172,8 +3027,7 @@ async function test_68 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3188,8 +3042,7 @@ async function test_68 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3220,8 +3073,7 @@ async function test_69 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3236,8 +3088,7 @@ async function test_69 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3268,8 +3119,7 @@ async function test_70 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3284,8 +3134,7 @@ async function test_70 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3316,8 +3165,7 @@ async function test_71 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3332,8 +3180,7 @@ async function test_71 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3364,8 +3211,7 @@ async function test_72 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3380,8 +3226,7 @@ async function test_72 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3412,8 +3257,7 @@ async function test_73 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3428,8 +3272,7 @@ async function test_73 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3460,8 +3303,7 @@ async function test_74 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3476,8 +3318,7 @@ async function test_74 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3508,8 +3349,7 @@ async function test_75 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3524,8 +3364,7 @@ async function test_75 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3556,8 +3395,7 @@ async function test_76 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3572,8 +3410,7 @@ async function test_76 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3604,8 +3441,7 @@ async function test_77 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3620,8 +3456,7 @@ async function test_77 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3652,8 +3487,7 @@ async function test_78 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3668,8 +3502,7 @@ async function test_78 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3700,8 +3533,7 @@ async function test_79 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3716,8 +3548,7 @@ async function test_79 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3748,8 +3579,7 @@ async function test_80 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3764,8 +3594,7 @@ async function test_80 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3796,8 +3625,7 @@ async function test_81 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3812,8 +3640,7 @@ async function test_81 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];
@@ -3844,8 +3671,7 @@ async function test_82 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
@@ -3860,8 +3686,7 @@ async function test_82 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(didEmitEventTest, context, ["WasAltered"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertiesTest, context, [["size","rotationCenter"]])),
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null]))
     ];

@@ -105,9 +105,28 @@ function hasPropertyTest (context, key) {
 };
 
 const hasProperty = function (key) {
+    if (typeof key !== 'string') throw new Error('Passed a non-string');
     return evaluate({
         plan: 1,
         test: [hasPropertyTest, key]
+    });
+};
+
+function hasPropertiesTest (context, keys) {
+    // Test that this does not throw.
+    for (const key of keys) {
+        context.value[key];
+    }
+    return keys.map(key => (
+        ['ok', key in context.value, `has ${key} property`]
+    ));
+};
+
+const hasProperties = function (keys) {
+    if (!Array.isArray(keys)) throw new Error('Passed a non-Array');
+    return evaluate({
+        plan: keys.length,
+        test: [hasPropertiesTest, keys]
     });
 };
 
@@ -231,6 +250,7 @@ module.exports = {
     state,
     value,
     hasProperty,
+    hasProperties,
     resolver,
     call,
     afterEach,
