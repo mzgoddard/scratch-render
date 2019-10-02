@@ -29,19 +29,11 @@ function hasPropertyTest (context, key) {
 function skinIdTest (context) {
     context.skinId = Math.random().toString().slice(2);
 }
-function newTextBubbleSkin (context) {
-    context.value = context.skin = new context.module.TextBubbleSkin(context.skinId, context.renderer);
+function newBitmapSkin (context) {
+    context.value = context.skin = new context.module.BitmapSkin(context.skinId, context.renderer);
 }
 function rotationCenterIsArray (context) {
     return [['ok', context.value.rotationCenter.length >= 2, 'rotationCenter is an array']];
-}
-function dispose (context) {
-    context.skin.dispose();
-    return [['equal',
-            context.skin.id,
-            context.module.RenderConstants.ID_NONE,
-            'disposed of its id'
-    ]];
 }
 function willEmitEventTest (context, event) {
     context.event = context.event || {};
@@ -58,14 +50,44 @@ function willEmitEventTest (context, event) {
         });
     });
 }
-function createTextBubble (context, textBubble) {
-    context.textBubble = textBubble;
-    context.imageSize = textBubble.size;
-    context.imageRotationCenter = [0, 0];
+async function loadAsset_fetch (context, name) {
+    context.assetResponse = await fetch(`./assets/${name}`);
+    return [
+        ['comment', `fetch('./assets/${name}')`],
+        ['equal', typeof context.assetResponse, 'object', 'sent asset request']
+    ];
 }
-function setTextBubble (context) {
-    const {type, text, pointsLeft} = context.textBubble;
-    context.skin.setTextBubble(type, text, pointsLeft);
+function storeImageSize (context, size) {
+    context.imageSize = size;
+}
+async function loadPNG_arrayBuffer (context) {
+    context.imageSourceBuffer = await context.assetResponse.arrayBuffer();
+    context.imageSourceBlob = new Blob([context.imageSourceBuffer], {type: 'image/png'});
+    return [
+        ['equal', typeof context.imageSourceBuffer, 'object', 'loaded png buffer']
+    ];
+}
+async function loadPNG_image (context) {
+    context.imageSource = await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(context.imageSourceBlob);
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = url;
+    });
+    return [
+        ['ok', context.imageSource instanceof Image, 'loaded png image']
+    ];
+}
+function imageRotationCenter (context) {
+    context.imageRotationCenter = [
+        context.imageSize[0] / 2, context.imageSize[1] / 2
+    ];
+}
+function setBitmap (context) {
+    context.imageResolution = 2;
+    context.imageRotationCenter = context.imageSize.map(dim => dim / 2);
+    context.skin.setBitmap(context.imageSource);
 }
 function skinSize (context) {
     const {size} = context.skin;
@@ -102,7 +124,37 @@ function texture (context, scale) {
         ['same', Array.from(uniforms.u_skinSize, Math.ceil), context.imageSize, 'u_skinSize is size']
     ];
 }
-// 1: new TextBubbleSkin, dispose
+function setBitmap_rotationCenter (context) {
+    context.imageResolution = 2;
+    context.imageRotationCenter = [10, 10];
+    context.skin.setBitmap(context.imageSource, context.imageResolution, [10, 10]);
+}
+async function loadPNG_canvas (context) {
+    const imageCanvas = document.createElement('canvas');
+    const imageContext = imageCanvas.getContext('2d');
+    imageCanvas.width = context.imageSource.width;
+    imageCanvas.height = context.imageSource.height;
+    imageContext.drawImage(context.imageSource, 0, 0, imageCanvas.width, imageCanvas.height);
+    context.imageSource = imageCanvas;
+    return [
+        ['ok', context.imageSource instanceof HTMLCanvasElement, 'rendered image into canvas']
+    ];
+}
+async function loadPNG_imageBitmap (context) {
+    context.imageSource = await createImageBitmap(context.imageSourceBlob);
+    return [
+        ['equal', typeof context.imageSource, 'object', 'loaded png imageBitmap']
+    ];
+}
+function dispose (context) {
+    context.skin.dispose();
+    return [['equal',
+            context.skin.id,
+            context.module.RenderConstants.ID_NONE,
+            'disposed of its id'
+    ]];
+}
+// 1: new BitmapSkin
 async function test_1 () {
     const context = {};
     return [
@@ -113,8 +165,8 @@ async function test_1 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["on"])),
         ...(await call(hasPropertyTest, context, ["off"])),
@@ -123,12 +175,10 @@ async function test_1 () {
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(hasPropertyTest, context, ["isRaster"])),
         ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
-        ...(await call(dispose, context, []))
+        ...(await call(rotationCenterIsArray, context, []))
     ];
 }
-// 2: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), dispose
+// 2: new BitmapSkin, new Image, setBitmap(orange50x50.png), getTexture()
 async function test_2 () {
     const context = {};
     return [
@@ -139,11 +189,235 @@ async function test_2 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_image, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(skinSize, context, [])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(skinRotationCenter, context, [])),
+        ...(await call(texture, context, [null]))
+    ];
+}
+// 3: new BitmapSkin, new Image, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
+async function test_3 () {
+    const context = {};
+    return [
+        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+        ...(await call(createCanvas, context, [])),
+        ...(await call(newRenderWebGL, context, [])),
+        ...(await call(valueTest, context, ["renderer"])),
+        ...(await call(hasPropertyTest, context, ["gl"])),
+        ...(await call(hasPropertyTest, context, ["canvas"])),
+        ...(await call(skinIdTest, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
+        ...(await call(willEmitEventTest, context, ["WasAltered"])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_image, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(skinSize, context, [])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(skinRotationCenter, context, [])),
+        ...(await call(texture, context, [null]))
+    ];
+}
+// 4: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orange50x50.png), getTexture()
+async function test_4 () {
+    const context = {};
+    return [
+        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+        ...(await call(createCanvas, context, [])),
+        ...(await call(newRenderWebGL, context, [])),
+        ...(await call(valueTest, context, ["renderer"])),
+        ...(await call(hasPropertyTest, context, ["gl"])),
+        ...(await call(hasPropertyTest, context, ["canvas"])),
+        ...(await call(skinIdTest, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
+        ...(await call(willEmitEventTest, context, ["WasAltered"])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_image, context, [])),
+        ...(await call(loadPNG_canvas, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(skinSize, context, [])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(skinRotationCenter, context, [])),
+        ...(await call(texture, context, [null]))
+    ];
+}
+// 5: new BitmapSkin, new Image, HTMLCanvasElement, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
+async function test_5 () {
+    const context = {};
+    return [
+        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+        ...(await call(createCanvas, context, [])),
+        ...(await call(newRenderWebGL, context, [])),
+        ...(await call(valueTest, context, ["renderer"])),
+        ...(await call(hasPropertyTest, context, ["gl"])),
+        ...(await call(hasPropertyTest, context, ["canvas"])),
+        ...(await call(skinIdTest, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
+        ...(await call(willEmitEventTest, context, ["WasAltered"])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_image, context, [])),
+        ...(await call(loadPNG_canvas, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(skinSize, context, [])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(skinRotationCenter, context, [])),
+        ...(await call(texture, context, [null]))
+    ];
+}
+// 6: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture()
+async function test_6 () {
+    const context = {};
+    return [
+        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+        ...(await call(createCanvas, context, [])),
+        ...(await call(newRenderWebGL, context, [])),
+        ...(await call(valueTest, context, ["renderer"])),
+        ...(await call(hasPropertyTest, context, ["gl"])),
+        ...(await call(hasPropertyTest, context, ["canvas"])),
+        ...(await call(skinIdTest, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
+        ...(await call(willEmitEventTest, context, ["WasAltered"])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(skinSize, context, [])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(skinRotationCenter, context, [])),
+        ...(await call(texture, context, [null]))
+    ];
+}
+// 7: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
+async function test_7 () {
+    const context = {};
+    return [
+        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+        ...(await call(createCanvas, context, [])),
+        ...(await call(newRenderWebGL, context, [])),
+        ...(await call(valueTest, context, ["renderer"])),
+        ...(await call(hasPropertyTest, context, ["gl"])),
+        ...(await call(hasPropertyTest, context, ["canvas"])),
+        ...(await call(skinIdTest, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
+        ...(await call(willEmitEventTest, context, ["WasAltered"])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(skinSize, context, [])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(skinRotationCenter, context, [])),
+        ...(await call(texture, context, [null]))
+    ];
+}
+// 8: new BitmapSkin, dispose
+async function test_8 () {
+    const context = {};
+    return [
+        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+        ...(await call(createCanvas, context, [])),
+        ...(await call(newRenderWebGL, context, [])),
+        ...(await call(valueTest, context, ["renderer"])),
+        ...(await call(hasPropertyTest, context, ["gl"])),
+        ...(await call(hasPropertyTest, context, ["canvas"])),
+        ...(await call(skinIdTest, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
+        ...(await call(valueTest, context, ["skin"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
+        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
+        ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
+        ...(await call(dispose, context, []))
+    ];
+}
+// 9: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), dispose
+async function test_9 () {
+    const context = {};
+    return [
+        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
+        ...(await call(createCanvas, context, [])),
+        ...(await call(newRenderWebGL, context, [])),
+        ...(await call(valueTest, context, ["renderer"])),
+        ...(await call(hasPropertyTest, context, ["gl"])),
+        ...(await call(hasPropertyTest, context, ["canvas"])),
+        ...(await call(skinIdTest, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
+        ...(await call(willEmitEventTest, context, ["WasAltered"])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -158,266 +432,7 @@ async function test_2 () {
         ...(await call(dispose, context, []))
     ];
 }
-// 3: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture()
-async function test_3 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 4: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture()
-async function test_4 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 5: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
-async function test_5 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 6: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture()
-async function test_6 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 7: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
-async function test_7 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 8: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture()
-async function test_8 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 9: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
-async function test_9 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 10: new TextBubbleSkin, setTextBubble(say, , true), getTexture()
+// 10: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), dispose
 async function test_10 () {
     const context = {};
     return [
@@ -428,20 +443,15 @@ async function test_10 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["on"])),
-        ...(await call(hasPropertyTest, context, ["off"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["id"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(hasPropertyTest, context, ["isRaster"])),
-        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
-        ...(await call(rotationCenterIsArray, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -451,10 +461,12 @@ async function test_10 () {
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
         ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
+        ...(await call(texture, context, [null])),
+        ...(await call(loadModuleVarTest, context, ["RenderConstants","./RenderConstants.js"])),
+        ...(await call(dispose, context, []))
     ];
 }
-// 11: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 11: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_11 () {
     const context = {};
     return [
@@ -465,8 +477,8 @@ async function test_11 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["on"])),
         ...(await call(hasPropertyTest, context, ["off"])),
@@ -477,8 +489,12 @@ async function test_11 () {
         ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
         ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -491,7 +507,7 @@ async function test_11 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 12: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 12: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_12 () {
     const context = {};
     return [
@@ -502,24 +518,24 @@ async function test_12 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -532,7 +548,7 @@ async function test_12 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 13: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 13: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_13 () {
     const context = {};
     return [
@@ -543,24 +559,24 @@ async function test_13 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -573,7 +589,7 @@ async function test_13 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 14: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 14: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_14 () {
     const context = {};
     return [
@@ -584,24 +600,24 @@ async function test_14 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -614,7 +630,7 @@ async function test_14 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 15: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 15: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_15 () {
     const context = {};
     return [
@@ -625,24 +641,24 @@ async function test_15 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -655,7 +671,7 @@ async function test_15 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 16: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 16: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_16 () {
     const context = {};
     return [
@@ -666,24 +682,24 @@ async function test_16 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -696,7 +712,7 @@ async function test_16 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 17: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 17: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_17 () {
     const context = {};
     return [
@@ -707,24 +723,24 @@ async function test_17 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -737,7 +753,7 @@ async function test_17 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 18: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 18: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_18 () {
     const context = {};
     return [
@@ -748,24 +764,24 @@ async function test_18 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
+        ...(await call(hasPropertyTest, context, ["on"])),
+        ...(await call(hasPropertyTest, context, ["off"])),
         ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
+        ...(await call(hasPropertyTest, context, ["id"])),
         ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
+        ...(await call(hasPropertyTest, context, ["isRaster"])),
+        ...(await call(hasPropertyTest, context, ["hasPremultipliedAlpha"])),
+        ...(await call(rotationCenterIsArray, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -778,7 +794,7 @@ async function test_18 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 19: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, , true), getTexture()
+// 19: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_19 () {
     const context = {};
     return [
@@ -789,11 +805,15 @@ async function test_19 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -805,8 +825,11 @@ async function test_19 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -819,7 +842,7 @@ async function test_19 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 20: new TextBubbleSkin, setTextBubble(say, Hello World!, true), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 20: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_20 () {
     const context = {};
     return [
@@ -830,11 +853,15 @@ async function test_20 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -846,8 +873,11 @@ async function test_20 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -860,7 +890,7 @@ async function test_20 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 21: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 21: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_21 () {
     const context = {};
     return [
@@ -871,11 +901,15 @@ async function test_21 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -887,8 +921,11 @@ async function test_21 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -901,7 +938,7 @@ async function test_21 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 22: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 22: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_22 () {
     const context = {};
     return [
@@ -912,11 +949,15 @@ async function test_22 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -928,8 +969,11 @@ async function test_22 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -942,7 +986,7 @@ async function test_22 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 23: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 23: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_23 () {
     const context = {};
     return [
@@ -953,11 +997,15 @@ async function test_23 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -969,8 +1017,11 @@ async function test_23 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -983,7 +1034,7 @@ async function test_23 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 24: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 24: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_24 () {
     const context = {};
     return [
@@ -994,11 +1045,15 @@ async function test_24 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1010,8 +1065,11 @@ async function test_24 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1024,7 +1082,7 @@ async function test_24 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 25: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 25: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_25 () {
     const context = {};
     return [
@@ -1035,11 +1093,15 @@ async function test_25 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1051,8 +1113,11 @@ async function test_25 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1065,7 +1130,7 @@ async function test_25 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 26: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 26: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_26 () {
     const context = {};
     return [
@@ -1076,11 +1141,15 @@ async function test_26 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1092,8 +1161,11 @@ async function test_26 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1106,7 +1178,7 @@ async function test_26 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 27: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 27: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_27 () {
     const context = {};
     return [
@@ -1117,11 +1189,15 @@ async function test_27 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1133,8 +1209,11 @@ async function test_27 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1147,7 +1226,7 @@ async function test_27 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 28: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, , true), getTexture()
+// 28: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_28 () {
     const context = {};
     return [
@@ -1158,11 +1237,15 @@ async function test_28 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1174,8 +1257,11 @@ async function test_28 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1188,7 +1274,7 @@ async function test_28 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 29: new TextBubbleSkin, setTextBubble(think, Hello World!, true), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 29: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_29 () {
     const context = {};
     return [
@@ -1199,11 +1285,15 @@ async function test_29 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1215,8 +1305,11 @@ async function test_29 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1229,7 +1322,7 @@ async function test_29 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 30: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 30: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_30 () {
     const context = {};
     return [
@@ -1240,11 +1333,15 @@ async function test_30 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1256,8 +1353,11 @@ async function test_30 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1270,7 +1370,7 @@ async function test_30 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 31: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 31: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_31 () {
     const context = {};
     return [
@@ -1281,11 +1381,15 @@ async function test_31 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1297,8 +1401,11 @@ async function test_31 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1311,7 +1418,7 @@ async function test_31 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 32: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 32: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_32 () {
     const context = {};
     return [
@@ -1322,11 +1429,15 @@ async function test_32 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1338,8 +1449,11 @@ async function test_32 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1352,7 +1466,7 @@ async function test_32 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 33: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 33: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_33 () {
     const context = {};
     return [
@@ -1363,11 +1477,15 @@ async function test_33 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1379,8 +1497,11 @@ async function test_33 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1393,7 +1514,7 @@ async function test_33 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 34: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 34: new BitmapSkin, createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_34 () {
     const context = {};
     return [
@@ -1404,11 +1525,15 @@ async function test_34 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1420,8 +1545,11 @@ async function test_34 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1434,7 +1562,7 @@ async function test_34 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 35: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 35: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_35 () {
     const context = {};
     return [
@@ -1445,11 +1573,15 @@ async function test_35 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1461,8 +1593,11 @@ async function test_35 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1475,7 +1610,7 @@ async function test_35 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 36: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 36: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_36 () {
     const context = {};
     return [
@@ -1486,11 +1621,15 @@ async function test_36 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1502,8 +1641,11 @@ async function test_36 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1516,7 +1658,7 @@ async function test_36 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 37: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, , true), getTexture()
+// 37: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_37 () {
     const context = {};
     return [
@@ -1527,11 +1669,15 @@ async function test_37 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1543,8 +1689,11 @@ async function test_37 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1557,7 +1706,7 @@ async function test_37 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 38: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 38: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_38 () {
     const context = {};
     return [
@@ -1568,11 +1717,15 @@ async function test_38 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1584,8 +1737,11 @@ async function test_38 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1598,7 +1754,7 @@ async function test_38 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 39: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 39: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_39 () {
     const context = {};
     return [
@@ -1609,11 +1765,15 @@ async function test_39 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1625,8 +1785,11 @@ async function test_39 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1639,7 +1802,7 @@ async function test_39 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 40: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 40: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_40 () {
     const context = {};
     return [
@@ -1650,11 +1813,15 @@ async function test_40 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1666,8 +1833,11 @@ async function test_40 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1680,7 +1850,7 @@ async function test_40 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 41: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 41: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_41 () {
     const context = {};
     return [
@@ -1691,11 +1861,15 @@ async function test_41 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1707,8 +1881,11 @@ async function test_41 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1721,7 +1898,7 @@ async function test_41 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 42: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 42: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_42 () {
     const context = {};
     return [
@@ -1732,11 +1909,15 @@ async function test_42 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1748,8 +1929,11 @@ async function test_42 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1762,7 +1946,7 @@ async function test_42 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 43: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 43: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_43 () {
     const context = {};
     return [
@@ -1773,11 +1957,15 @@ async function test_43 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1789,8 +1977,11 @@ async function test_43 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1803,7 +1994,7 @@ async function test_43 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 44: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 44: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_44 () {
     const context = {};
     return [
@@ -1814,11 +2005,15 @@ async function test_44 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1830,8 +2025,11 @@ async function test_44 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1844,7 +2042,7 @@ async function test_44 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 45: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 45: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_45 () {
     const context = {};
     return [
@@ -1855,11 +2053,15 @@ async function test_45 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1871,8 +2073,11 @@ async function test_45 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1885,7 +2090,7 @@ async function test_45 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 46: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, , true), getTexture()
+// 46: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_46 () {
     const context = {};
     return [
@@ -1896,11 +2101,15 @@ async function test_46 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1912,8 +2121,11 @@ async function test_46 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1926,7 +2138,7 @@ async function test_46 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 47: new TextBubbleSkin, setTextBubble(say, Hello World!, false), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 47: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_47 () {
     const context = {};
     return [
@@ -1937,11 +2149,15 @@ async function test_47 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1953,8 +2169,11 @@ async function test_47 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1967,7 +2186,7 @@ async function test_47 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 48: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 48: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_48 () {
     const context = {};
     return [
@@ -1978,11 +2197,15 @@ async function test_48 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -1994,8 +2217,11 @@ async function test_48 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2008,7 +2234,7 @@ async function test_48 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 49: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 49: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_49 () {
     const context = {};
     return [
@@ -2019,11 +2245,15 @@ async function test_49 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2035,8 +2265,11 @@ async function test_49 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2049,7 +2282,7 @@ async function test_49 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 50: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 50: new BitmapSkin, createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_50 () {
     const context = {};
     return [
@@ -2060,11 +2293,15 @@ async function test_50 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2076,8 +2313,11 @@ async function test_50 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2090,7 +2330,7 @@ async function test_50 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 51: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 51: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_51 () {
     const context = {};
     return [
@@ -2101,11 +2341,15 @@ async function test_51 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2117,8 +2361,11 @@ async function test_51 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2131,7 +2378,7 @@ async function test_51 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 52: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 52: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_52 () {
     const context = {};
     return [
@@ -2142,11 +2389,15 @@ async function test_52 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2158,8 +2409,11 @@ async function test_52 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2172,7 +2426,7 @@ async function test_52 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 53: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 53: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_53 () {
     const context = {};
     return [
@@ -2183,11 +2437,15 @@ async function test_53 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2199,8 +2457,11 @@ async function test_53 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2213,7 +2474,7 @@ async function test_53 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 54: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 54: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_54 () {
     const context = {};
     return [
@@ -2224,11 +2485,15 @@ async function test_54 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2240,8 +2505,11 @@ async function test_54 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2254,7 +2522,7 @@ async function test_54 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 55: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, , true), getTexture()
+// 55: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_55 () {
     const context = {};
     return [
@@ -2265,11 +2533,15 @@ async function test_55 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2281,8 +2553,11 @@ async function test_55 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2295,7 +2570,7 @@ async function test_55 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 56: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., false), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 56: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_56 () {
     const context = {};
     return [
@@ -2306,11 +2581,15 @@ async function test_56 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2322,8 +2601,11 @@ async function test_56 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2336,7 +2618,7 @@ async function test_56 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 57: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 57: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_57 () {
     const context = {};
     return [
@@ -2347,11 +2629,15 @@ async function test_57 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2363,8 +2649,11 @@ async function test_57 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2377,7 +2666,7 @@ async function test_57 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 58: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 58: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_58 () {
     const context = {};
     return [
@@ -2388,11 +2677,15 @@ async function test_58 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2404,8 +2697,11 @@ async function test_58 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2418,7 +2714,7 @@ async function test_58 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 59: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 59: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_59 () {
     const context = {};
     return [
@@ -2429,11 +2725,15 @@ async function test_59 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2445,8 +2745,11 @@ async function test_59 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2459,7 +2762,7 @@ async function test_59 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 60: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 60: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_60 () {
     const context = {};
     return [
@@ -2470,11 +2773,15 @@ async function test_60 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2486,8 +2793,11 @@ async function test_60 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2500,7 +2810,7 @@ async function test_60 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 61: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 61: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_61 () {
     const context = {};
     return [
@@ -2511,11 +2821,15 @@ async function test_61 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2527,8 +2841,11 @@ async function test_61 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2541,7 +2858,7 @@ async function test_61 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 62: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 62: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_62 () {
     const context = {};
     return [
@@ -2552,11 +2869,15 @@ async function test_62 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2568,8 +2889,11 @@ async function test_62 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2582,7 +2906,7 @@ async function test_62 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 63: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 63: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_63 () {
     const context = {};
     return [
@@ -2593,11 +2917,15 @@ async function test_63 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2609,8 +2937,11 @@ async function test_63 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2623,7 +2954,7 @@ async function test_63 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 64: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, , true), getTexture()
+// 64: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_64 () {
     const context = {};
     return [
@@ -2634,11 +2965,15 @@ async function test_64 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2650,8 +2985,11 @@ async function test_64 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2664,7 +3002,7 @@ async function test_64 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 65: new TextBubbleSkin, setTextBubble(say, Hello\nWorld!, true), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 65: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_65 () {
     const context = {};
     return [
@@ -2675,11 +3013,15 @@ async function test_65 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2691,8 +3033,11 @@ async function test_65 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2705,7 +3050,7 @@ async function test_65 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 66: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 66: new BitmapSkin, createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_66 () {
     const context = {};
     return [
@@ -2716,11 +3061,15 @@ async function test_66 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2732,8 +3081,11 @@ async function test_66 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2746,7 +3098,7 @@ async function test_66 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 67: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 67: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_67 () {
     const context = {};
     return [
@@ -2757,11 +3109,15 @@ async function test_67 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2773,8 +3129,11 @@ async function test_67 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2787,7 +3146,7 @@ async function test_67 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 68: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 68: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_68 () {
     const context = {};
     return [
@@ -2798,11 +3157,15 @@ async function test_68 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2814,8 +3177,11 @@ async function test_68 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2828,7 +3194,7 @@ async function test_68 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 69: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 69: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_69 () {
     const context = {};
     return [
@@ -2839,11 +3205,15 @@ async function test_69 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2855,8 +3225,11 @@ async function test_69 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2869,7 +3242,7 @@ async function test_69 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 70: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 70: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_70 () {
     const context = {};
     return [
@@ -2880,11 +3253,15 @@ async function test_70 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2896,8 +3273,11 @@ async function test_70 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2910,7 +3290,7 @@ async function test_70 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 71: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 71: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_71 () {
     const context = {};
     return [
@@ -2921,11 +3301,15 @@ async function test_71 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2937,8 +3321,11 @@ async function test_71 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2951,7 +3338,7 @@ async function test_71 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 72: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 72: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_72 () {
     const context = {};
     return [
@@ -2962,11 +3349,15 @@ async function test_72 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2978,8 +3369,11 @@ async function test_72 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -2992,7 +3386,7 @@ async function test_72 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 73: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, , true), getTexture()
+// 73: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_73 () {
     const context = {};
     return [
@@ -3003,11 +3397,15 @@ async function test_73 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3019,8 +3417,11 @@ async function test_73 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3033,7 +3434,7 @@ async function test_73 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 74: new TextBubbleSkin, setTextBubble(say, Lorem ipsum dolor si..., true), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
+// 74: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_74 () {
     const context = {};
     return [
@@ -3044,11 +3445,15 @@ async function test_74 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3060,8 +3465,11 @@ async function test_74 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3074,7 +3482,7 @@ async function test_74 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 75: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
+// 75: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png), getTexture()
 async function test_75 () {
     const context = {};
     return [
@@ -3085,11 +3493,15 @@ async function test_75 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3101,8 +3513,11 @@ async function test_75 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3115,7 +3530,7 @@ async function test_75 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 76: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
+// 76: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(orange50x50.png, 2, [10, 10]), getTexture()
 async function test_76 () {
     const context = {};
     return [
@@ -3126,11 +3541,15 @@ async function test_76 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3142,8 +3561,11 @@ async function test_76 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["orange50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3156,7 +3578,7 @@ async function test_76 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 77: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 77: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png), getTexture()
 async function test_77 () {
     const context = {};
     return [
@@ -3167,11 +3589,15 @@ async function test_77 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3183,8 +3609,11 @@ async function test_77 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3197,7 +3626,7 @@ async function test_77 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 78: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
+// 78: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(purple100x100.png, 2, [10, 10]), getTexture()
 async function test_78 () {
     const context = {};
     return [
@@ -3208,11 +3637,15 @@ async function test_78 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3224,8 +3657,11 @@ async function test_78 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["purple100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3238,7 +3674,7 @@ async function test_78 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 79: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
+// 79: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png), getTexture()
 async function test_79 () {
     const context = {};
     return [
@@ -3249,11 +3685,15 @@ async function test_79 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3265,8 +3705,11 @@ async function test_79 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3279,7 +3722,7 @@ async function test_79 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 80: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
+// 80: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient50x50.png, 2, [10, 10]), getTexture()
 async function test_80 () {
     const context = {};
     return [
@@ -3290,11 +3733,15 @@ async function test_80 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3306,8 +3753,11 @@ async function test_80 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient50x50.png"])),
+        ...(await call(storeImageSize, context, [[50,50]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3320,7 +3770,7 @@ async function test_80 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 81: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
+// 81: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png), getTexture()
 async function test_81 () {
     const context = {};
     return [
@@ -3331,11 +3781,15 @@ async function test_81 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3347,8 +3801,11 @@ async function test_81 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3361,7 +3818,7 @@ async function test_81 () {
         ...(await call(texture, context, [null]))
     ];
 }
-// 82: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, , true), getTexture()
+// 82: new BitmapSkin, createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture(), createImageBitmap, setBitmap(gradient100x100.png, 2, [10, 10]), getTexture()
 async function test_82 () {
     const context = {};
     return [
@@ -3372,11 +3829,15 @@ async function test_82 () {
         ...(await call(hasPropertyTest, context, ["gl"])),
         ...(await call(hasPropertyTest, context, ["canvas"])),
         ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
+        ...(await call(loadModuleVarTest, context, ["BitmapSkin","./BitmapSkin.js"])),
+        ...(await call(newBitmapSkin, context, [])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(imageRotationCenter, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
@@ -3388,418 +3849,11 @@ async function test_82 () {
         ...(await call(skinRotationCenter, context, [])),
         ...(await call(texture, context, [null])),
         ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 83: new TextBubbleSkin, setTextBubble(say, , true), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
-async function test_83 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 84: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, Hello World!, true), getTexture()
-async function test_84 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 85: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(think, Hello World!, true), getTexture()
-async function test_85 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"think","text":"Hello World!","pointsLeft":true,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 86: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
-async function test_86 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":true,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 87: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, Hello World!, false), getTexture()
-async function test_87 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello World!","pointsLeft":false,"size":[100,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 88: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., false), getTexture()
-async function test_88 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","pointsLeft":false,"size":[192,132]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 89: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, Hello\nWorld!, true), getTexture()
-async function test_89 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Hello\nWorld!","pointsLeft":true,"size":[74,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 90: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, Lorem ipsum dolor si..., true), getTexture()
-async function test_90 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"Lorem ipsum dolor sit amet,\nconsectetur adipiscing elit,\nsed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n","pointsLeft":true,"size":[189,132]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 91: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, , true), getTexture()
-async function test_91 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"","pointsLeft":true,"size":[74,52]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null]))
-    ];
-}
-// 92: new TextBubbleSkin, setTextBubble(say, pneumonoultramicrosc..., true), getTexture(), setTextBubble(say, pneumonoultramicrosc..., true), getTexture()
-async function test_92 () {
-    const context = {};
-    return [
-        ...(await call(loadModuleVarTest, context, ["RenderWebGL","./RenderWebGL.js"])),
-        ...(await call(createCanvas, context, [])),
-        ...(await call(newRenderWebGL, context, [])),
-        ...(await call(valueTest, context, ["renderer"])),
-        ...(await call(hasPropertyTest, context, ["gl"])),
-        ...(await call(hasPropertyTest, context, ["canvas"])),
-        ...(await call(skinIdTest, context, [])),
-        ...(await call(loadModuleVarTest, context, ["TextBubbleSkin","./TextBubbleSkin.js"])),
-        ...(await call(newTextBubbleSkin, context, [])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(skinSize, context, [])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(didEmitEventTest, context, ["WasAltered"])),
-        ...(await call(valueTest, context, ["skin"])),
-        ...(await call(hasPropertyTest, context, ["size"])),
-        ...(await call(hasPropertyTest, context, ["rotationCenter"])),
-        ...(await call(skinRotationCenter, context, [])),
-        ...(await call(texture, context, [null])),
-        ...(await call(willEmitEventTest, context, ["WasAltered"])),
-        ...(await call(createTextBubble, context, [{"type":"say","text":"pneumonoultramicroscopicsilicovolcanoconiosis","pointsLeft":true,"size":[192,68]}])),
-        ...(await call(setTextBubble, context, [])),
+        ...(await call(loadAsset_fetch, context, ["gradient100x100.png"])),
+        ...(await call(storeImageSize, context, [[100,100]])),
+        ...(await call(loadPNG_arrayBuffer, context, [])),
+        ...(await call(loadPNG_imageBitmap, context, [])),
+        ...(await call(setBitmap_rotationCenter, context, [])),
         ...(await call(valueTest, context, ["skin"])),
         ...(await call(hasPropertyTest, context, ["size"])),
         ...(await call(skinSize, context, [])),
